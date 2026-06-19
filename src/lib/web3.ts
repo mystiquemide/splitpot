@@ -1,17 +1,9 @@
-import { createConfig, http } from "wagmi"
+import { getDefaultConfig } from "@rainbow-me/rainbowkit"
 import { mainnet, sepolia, base, baseSepolia } from "wagmi/chains"
-import { injected, walletConnect } from "wagmi/connectors"
 
-export const config = createConfig({
+export const config = getDefaultConfig({
+  appName: "Boilerplate",
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
   chains: [mainnet, sepolia, base, baseSepolia],
-  connectors: [
-    injected(),
-    walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "" }),
-  ],
-  transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
-    [base.id]: http(),
-    [baseSepolia.id]: http(),
-  },
+  ssr: true,
 })

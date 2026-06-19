@@ -8,7 +8,7 @@ Pre-built hackathon starter for Web3 projects. Wallet connect, smart contract in
 |-------|-------|-------|
 | Framework | Next.js 15 + TypeScript | App Router |
 | Styling | Tailwind CSS v4 | Dark theme default |
-| Web3 | wagmi v2 + viem + WalletConnect | Multi-chain (mainnet, sepolia, base, baseSepolia) |
+| Web3 | wagmi v2 + viem + RainbowKit v2 + WalletConnect | Multi-chain (mainnet, sepolia, base, baseSepolia) |
 | Auth | NextAuth v5 (beta) | Optional, for web2+web3 hybrid apps |
 | Database | Prisma + SQLite | Optional, for storing user data off-chain |
 | UI | 5 components | Button, Card, Modal, Toast, Skeleton |
@@ -20,7 +20,7 @@ Pre-built hackathon starter for Web3 projects. Wallet connect, smart contract in
 □ Web3 not needed → delete:
    - src/lib/web3.ts
    - src/components/web3/
-   - Remove wagmi, viem, @tanstack/react-query from package.json
+   - Remove wagmi, viem, @tanstack/react-query, @rainbow-me/rainbowkit from package.json
 
 □ Auth not needed → delete:
    - src/lib/auth.ts
