@@ -130,13 +130,13 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
 
   return (
     <>
-      <form onSubmit={onPrepare} className="space-y-5 proof-card-flat p-6">
-        <div className="border-b-2 border-black pb-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-1">
-            New pot
-          </p>
-          <h2 className="font-display text-3xl text-black leading-tight">Create matchday pot</h2>
-          <p className="text-sm text-neutral-600 mt-2">
+      <form onSubmit={onPrepare} className="space-y-5 proof-card p-6 bg-white text-black">
+        <div className="border-b-2 border-[#0a0a0a] pb-4">
+          <p className="stamp mb-3">New pot</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-[#0a0a0a] leading-tight">
+            Create matchday pot
+          </h2>
+          <p className="text-sm text-neutral-600 mt-2 leading-relaxed">
             Equal stake. Sign your pick with WDK. Optional on-chain USDt stakes.
           </p>
         </div>
@@ -147,7 +147,7 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
               key={s.title}
               type="button"
               onClick={() => applySample(i)}
-              className="font-mono text-[10px] uppercase tracking-wider border-2 border-black px-3 py-1.5 text-black hover:bg-black hover:text-white"
+              className="font-mono text-[10px] uppercase tracking-wider border-2 border-[#0a0a0a] px-3 py-1.5 text-[#0a0a0a] hover:bg-[#0a0a0a] hover:text-[#fafafa]"
             >
               {s.homeTeam}–{s.awayTeam}
             </button>
@@ -234,10 +234,10 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
                 key={value}
                 type="button"
                 onClick={() => setHostPick(value)}
-                className={`border-2 border-black px-4 py-2 text-sm font-mono uppercase tracking-wide ${
+                className={`border-2 border-[#0a0a0a] px-4 py-2 text-sm font-mono uppercase tracking-wide ${
                   hostPick === value
-                    ? "bg-black text-white"
-                    : "bg-white text-black hover:bg-neutral-100"
+                    ? "bg-[#0a0a0a] text-[#fafafa]"
+                    : "bg-white text-[#0a0a0a] hover:bg-[#fafafa]"
                 }`}
               >
                 {label}
@@ -293,8 +293,8 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
           </p>
         )}
 
-        <Button type="submit" className="w-full sm:w-auto">
-          Review & sign to create
+        <Button type="submit" size="lg" className="w-full sm:w-auto">
+          Review and sign pot
         </Button>
       </form>
 
@@ -307,10 +307,10 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
             setPendingMessage("")
           }}
           wallet={wallet}
-          title="Sign to create pot"
-          subtitle="You'll sign your pick with your wallet. We verify it on this device before the pot is saved."
+          title="Sign pot"
+          subtitle="Same ink-and-paper flow as the rest of Splitpot. You sign with WDK; we verify on this device before the pot is saved."
           message={pendingMessage}
-          confirmLabel="Sign and create pot"
+          confirmLabel="Sign pot"
           onSigned={onSigned}
         />
       )}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <rect width="1024" height="1024" fill="#FAFAFA"/>
+  <!-- Split circle mark -->
+  <circle cx="512" cy="380" r="140" stroke="#0A0A0A" stroke-width="28" fill="none"/>
+  <line x1="512" y1="240" x2="512" y2="520" stroke="#0A0A0A" stroke-width="28"/>
+  <!-- Wordmark -->
+  <text x="512" y="680" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="96" font-weight="700" fill="#0A0A0A" letter-spacing="12">SPLITPOT</text>
+  <text x="512" y="740" text-anchor="middle" font-family="Courier New, monospace" font-size="22" fill="#0A0A0A" letter-spacing="8">SELF-CUSTODIAL POTS</text>
+</svg>

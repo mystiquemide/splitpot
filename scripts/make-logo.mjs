@@ -1,0 +1,24 @@
+import sharp from "sharp"
+import { writeFileSync } from "fs"
+
+const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+  <rect width="480" height="480" fill="#FAFAFA"/>
+  <circle cx="240" cy="175" r="72" fill="none" stroke="#0A0A0A" stroke-width="16"/>
+  <line x1="240" y1="103" x2="240" y2="247" stroke="#0A0A0A" stroke-width="16"/>
+  <text x="240" y="320" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700" fill="#0A0A0A" letter-spacing="6">SPLITPOT</text>
+  <text x="240" y="355" text-anchor="middle" font-family="Courier New, monospace" font-size="11" fill="#0A0A0A" letter-spacing="3">SELF-CUSTODIAL POTS</text>
+</svg>`
+
+writeFileSync("public/splitpot-logo-480.svg", svg)
+
+await sharp(Buffer.from(svg)).png().toFile("public/splitpot-logo-480.png")
+await sharp(Buffer.from(svg)).jpeg({ quality: 92 }).toFile("public/splitpot-logo-480.jpg")
+
+// Crop/resize generated alt to 480 square
+await sharp("public/splitpot-logo-alt.jpg")
+  .resize(480, 480, { fit: "cover", position: "centre" })
+  .jpeg({ quality: 90 })
+  .toFile("public/splitpot-logo-480-alt.jpg")
+
+console.log("logos written")

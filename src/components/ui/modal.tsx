@@ -22,20 +22,22 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg border-2 border-black bg-white p-6 shadow-[6px_6px_0_0_#0a0a0a]">
+      {/* Same ink treatment as landing black bars */}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg border-2 border-black bg-white p-6 shadow-[8px_8px_0_0_#0a0a0a]">
         <div className="flex items-start justify-between gap-4 mb-5 border-b-2 border-black pb-3">
           {title && (
-            <h2 className="font-display text-2xl leading-tight text-black pr-4">
+            <h2 className="font-display text-2xl sm:text-3xl leading-tight text-black pr-4">
               {title}
             </h2>
           )}
           <button
+            type="button"
             onClick={onClose}
-            className="border-2 border-black p-1 text-black hover:bg-black hover:text-white shrink-0"
+            className="border-2 border-black bg-white p-1 text-black hover:bg-black hover:text-white shrink-0"
             aria-label="Close"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" strokeWidth={2.5} />
           </button>
         </div>
         {children}
