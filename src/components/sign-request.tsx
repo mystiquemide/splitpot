@@ -29,10 +29,6 @@ type Props = {
   onSigned: (result: SignResult) => void | Promise<void>
 }
 
-/**
- * Real wallet signing gate: user must read the message and click Sign.
- * WDK personal_sign runs only after confirm. Signature is verified on-device.
- */
 export function SignRequest({
   open,
   onClose,
@@ -81,37 +77,45 @@ export function SignRequest({
   return (
     <Modal open={open} onClose={handleClose} title={title}>
       <div className="space-y-4">
-        <p className="text-sm text-gray-400">{subtitle}</p>
+        <p className="text-sm text-neutral-600 leading-relaxed">{subtitle}</p>
 
-        <div className="rounded-lg border border-gray-800 bg-gray-900/80 px-3 py-2">
-          <p className="text-xs text-gray-500">Signing as</p>
-          <p className="font-mono text-sm text-white">{shortAddr(wallet.address)}</p>
-          <p className="font-mono text-[11px] text-gray-500 break-all">{wallet.address}</p>
+        <div className="border-2 border-black bg-neutral-50 px-3 py-2">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+            Signing as
+          </p>
+          <p className="font-mono text-sm text-black">{shortAddr(wallet.address)}</p>
+          <p className="font-mono text-[10px] text-neutral-500 break-all">
+            {wallet.address}
+          </p>
         </div>
 
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 mb-1">
             Message to sign
           </p>
-          <pre className="max-h-48 overflow-auto rounded-lg border border-gray-800 bg-black/50 p-3 text-xs text-gray-200 whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="max-h-48 overflow-auto border-2 border-black bg-white p-3 text-xs text-black whitespace-pre-wrap font-mono leading-relaxed">
             {message}
           </pre>
         </div>
 
         {done && (
-          <div className="rounded-lg border border-emerald-800/50 bg-emerald-950/30 p-3 text-sm">
-            <p className="text-emerald-400 font-medium">
+          <div className="border-2 border-black bg-neutral-100 p-3 text-sm">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-black">
               {done.verified ? "Signed and verified" : "Signed"}
             </p>
-            <p className="font-mono text-xs text-gray-400 mt-1 break-all">
+            <p className="font-mono text-xs text-neutral-600 mt-1 break-all">
               {shortenSig(done.signature, 14)}
             </p>
           </div>
         )}
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3">
+            {error}
+          </p>
+        )}
 
-        <div className="flex flex-wrap gap-2 justify-end pt-1">
+        <div className="flex flex-wrap gap-2 justify-end pt-1 border-t-2 border-black pt-4">
           <Button variant="ghost" onClick={handleClose} disabled={busy}>
             {done ? "Done" : "Reject"}
           </Button>

@@ -108,41 +108,48 @@ export function WalletBar() {
   if (!wallet) {
     return (
       <>
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-5">
-          <p className="text-sm font-medium text-white mb-1">Self-custodial wallet</p>
-          <p className="text-sm text-gray-400 mb-4">
-            Powered by <span className="text-emerald-400">Tether WDK</span>. Create or import a
-            seed, then <strong className="text-gray-200 font-medium">sign a challenge</strong> to
-            prove you control the keys. Nothing is sent to a server.
+        <div className="proof-card-flat p-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-2">
+            Wallet
+          </p>
+          <p className="font-display text-2xl text-black mb-2 leading-tight">
+            Self-custodial
+          </p>
+          <p className="text-sm text-neutral-600 mb-5 leading-relaxed">
+            Powered by Tether WDK. Create or import a seed, then sign a challenge to prove you
+            control the keys. Nothing is sent to a server.
           </p>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={prepareCreate} disabled={busy} className="rounded-full">
+            <Button onClick={prepareCreate} disabled={busy}>
               {busy ? "Preparing…" : "Create WDK wallet"}
             </Button>
             <Button
               variant="outline"
               onClick={() => setImportOpen((v) => !v)}
               disabled={busy}
-              className="rounded-full"
             >
               Import seed
             </Button>
           </div>
           {importOpen && (
-            <div className="mt-3 space-y-2">
+            <div className="mt-4 space-y-2 border-t-2 border-black pt-4">
               <textarea
-                className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm"
+                className="w-full border-2 border-black bg-white px-3 py-2 text-sm font-mono"
                 rows={3}
                 placeholder="twelve word seed phrase…"
                 value={importSeed}
                 onChange={(e) => setImportSeed(e.target.value)}
               />
-              <Button size="sm" onClick={prepareImport} disabled={busy} className="rounded-full">
+              <Button size="sm" onClick={prepareImport} disabled={busy}>
                 Continue to sign
               </Button>
             </div>
           )}
-          {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+          {error && (
+            <p className="mt-3 font-mono text-xs uppercase tracking-wide text-black border-l-2 border-black pl-3">
+              {error}
+            </p>
+          )}
         </div>
 
         {unlockWallet && (
@@ -180,31 +187,30 @@ export function WalletBar() {
   }
 
   return (
-    <div className="rounded-2xl border border-emerald-900/50 bg-emerald-950/20 p-5">
+    <div className="proof-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-wide text-emerald-500">WDK wallet · unlocked</p>
-          <p className="font-mono text-sm text-white">{shortAddr(wallet.address)}</p>
-          <p className="text-xs text-gray-500 break-all mt-1">{wallet.address}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+            WDK wallet · unlocked
+          </p>
+          <p className="font-mono text-sm text-black mt-1">{shortAddr(wallet.address)}</p>
+          <p className="font-mono text-[10px] text-neutral-500 break-all mt-1">
+            {wallet.address}
+          </p>
           {wallet.unlockSignature && (
-            <p className="text-xs text-emerald-500/80 mt-1 font-mono">
-              unlock sig {shortenSig(wallet.unlockSignature, 8)}
+            <p className="font-mono text-[10px] text-neutral-500 mt-1">
+              unlock {shortenSig(wallet.unlockSignature, 8)}
             </p>
           )}
           {usdt && usdtBal != null && (
-            <p className="text-xs text-gray-300 mt-1">
+            <p className="font-mono text-xs text-black mt-2">
               {usdtBal} {usdt.symbol}
-              <span className="text-gray-500"> · {usdt.chainName}</span>
+              <span className="text-neutral-500"> · {usdt.chainName}</span>
             </p>
           )}
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSeed((v) => !v)}
-            className="rounded-full"
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowSeed((v) => !v)}>
             {showSeed ? "Hide seed" : "Show seed"}
           </Button>
           <Button variant="ghost" size="sm" onClick={logout}>
@@ -213,12 +219,18 @@ export function WalletBar() {
         </div>
       </div>
       {showSeed && (
-        <div className="mt-3 rounded-lg border border-amber-800/60 bg-amber-950/30 p-3">
-          <p className="text-xs text-amber-400 mb-1">Backup now. Session only. Never share.</p>
-          <p className="font-mono text-sm text-amber-100">{wallet.seedPhrase}</p>
+        <div className="mt-4 border-2 border-black bg-neutral-100 p-3">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-600 mb-2">
+            Backup now · session only · never share
+          </p>
+          <p className="font-mono text-sm text-black">{wallet.seedPhrase}</p>
         </div>
       )}
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {error && (
+        <p className="mt-3 font-mono text-xs uppercase tracking-wide text-black border-l-2 border-black pl-3">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

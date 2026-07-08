@@ -37,9 +37,6 @@ type Props = {
   onTransferred: (result: TransferResult) => void | Promise<void>
 }
 
-/**
- * Explicit on-chain USDt transfer gate. User must confirm before WDK transfer().
- */
 export function TransferRequest({
   open,
   onClose,
@@ -86,12 +83,12 @@ export function TransferRequest({
   if (!cfg) {
     return (
       <Modal open={open} onClose={onClose} title="USDt not configured">
-        <p className="text-sm text-gray-300">
-          Set <code className="text-emerald-400">NEXT_PUBLIC_USDT_ADDRESS</code> (and
-          matching RPC) in <code className="text-gray-400">.env.local</code> to enable
-          on-chain transfers.
+        <p className="text-sm text-neutral-600 leading-relaxed">
+          Set <code className="font-mono text-black">NEXT_PUBLIC_USDT_ADDRESS</code> (and matching
+          RPC) in <code className="font-mono text-black">.env.local</code> to enable on-chain
+          transfers.
         </p>
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-end border-t-2 border-black pt-4">
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
@@ -148,62 +145,70 @@ export function TransferRequest({
   return (
     <Modal open={open} onClose={handleClose} title={title}>
       <div className="space-y-4">
-        <p className="text-sm text-gray-400">
-          WDK will call ERC-20 <code className="text-gray-300">transfer</code>. Keys stay
-          on this device.
+        <p className="text-sm text-neutral-600">
+          WDK will call ERC-20 <code className="font-mono text-black">transfer</code>. Keys stay on
+          this device.
         </p>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="rounded-lg border border-gray-800 bg-gray-900/80 px-3 py-2">
-            <p className="text-xs text-gray-500">From</p>
-            <p className="font-mono text-sm text-white">{shortAddr(wallet.address)}</p>
+          <div className="border-2 border-black px-3 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">From</p>
+            <p className="font-mono text-sm text-black">{shortAddr(wallet.address)}</p>
           </div>
-          <div className="rounded-lg border border-gray-800 bg-gray-900/80 px-3 py-2">
-            <p className="text-xs text-gray-500">To</p>
-            <p className="font-mono text-sm text-white">{shortAddr(to)}</p>
+          <div className="border-2 border-black px-3 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">To</p>
+            <p className="font-mono text-sm text-black">{shortAddr(to)}</p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-emerald-900/40 bg-emerald-950/20 px-3 py-3">
-          <p className="text-2xl font-bold text-white">
+        <div className="border-2 border-black bg-neutral-50 px-4 py-4">
+          <p className="font-display text-3xl text-black leading-none">
             {amountHuman}{" "}
-            <span className="text-base font-medium text-emerald-400">{cfg.symbol}</span>
+            <span className="font-mono text-sm tracking-wider">{cfg.symbol}</span>
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 mt-2">
             {cfg.chainName} · {shortAddr(cfg.address)}
           </p>
           {balance != null && (
-            <p className="text-xs text-gray-400 mt-1">
-              Your balance: {balance} {cfg.symbol}
+            <p className="font-mono text-xs text-neutral-600 mt-2">
+              Balance: {balance} {cfg.symbol}
             </p>
           )}
-          {feeHint && <p className="text-xs text-gray-500 mt-1">{feeHint}</p>}
+          {feeHint && (
+            <p className="font-mono text-[10px] text-neutral-500 mt-1">{feeHint}</p>
+          )}
         </div>
 
-        <pre className="max-h-36 overflow-auto rounded-lg border border-gray-800 bg-black/50 p-3 text-xs text-gray-300 whitespace-pre-wrap font-mono">
+        <pre className="max-h-36 overflow-auto border-2 border-black bg-white p-3 text-xs text-neutral-700 whitespace-pre-wrap font-mono">
           {summary}
         </pre>
 
         {done && (
-          <div className="rounded-lg border border-emerald-800/50 bg-emerald-950/30 p-3 text-sm space-y-1">
-            <p className="text-emerald-400 font-medium">Transaction sent</p>
-            <p className="font-mono text-xs text-gray-400 break-all">
+          <div className="border-2 border-black bg-neutral-100 p-3 text-sm space-y-1">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-black">
+              Transaction sent
+            </p>
+            <p className="font-mono text-xs text-neutral-600 break-all">
               {shortenSig(done.hash, 12)}
             </p>
             <a
               href={txUrl(done.hash, cfg.explorerTx)}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-emerald-400 underline"
+              className="font-mono text-xs underline underline-offset-2"
             >
               View on explorer
             </a>
           </div>
         )}
 
-        {error && <p className="text-sm text-red-400 break-words">{error}</p>}
+        {error && (
+          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3 break-words">
+            {error}
+          </p>
+        )}
 
-        <div className="flex flex-wrap gap-2 justify-end pt-1">
+        <div className="flex flex-wrap gap-2 justify-end border-t-2 border-black pt-4">
           <Button variant="ghost" onClick={handleClose} disabled={busy}>
             {done ? "Done" : "Cancel"}
           </Button>
