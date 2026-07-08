@@ -29,8 +29,11 @@ export default function SecurityPage() {
         <DocsH2>What we protect</DocsH2>
         <DocsUl>
           <li>No server holds your seed (there is no custodial backend)</li>
+          <li>Seed encrypted in sessionStorage (AES-GCM + PBKDF2 passcode); plaintext only in memory while unlocked</li>
           <li>Signing requires an explicit confirm UI</li>
-          <li>Join signatures are verified before save</li>
+          <li>Join signatures are verified before save and re-checked on import when messages exist</li>
+          <li>Invite payloads use URL hash fragments (not sent as query to the origin server)</li>
+          <li>Security headers including CSP on all routes</li>
           <li>No API routes that accept or store secrets</li>
         </DocsUl>
       </section>
@@ -38,31 +41,37 @@ export default function SecurityPage() {
       <section className="space-y-3">
         <DocsH2>What we do not protect against</DocsH2>
         <DocsTable
-          headers={["Risk", "Why it matters"]}
+          headers={["Risk", "Why it matters", "Mitigation in app"]}
           rows={[
             [
               "XSS / malicious extension",
-              "Seed in sessionStorage can be read if the page is compromised",
+              "Compromised page can still abuse an unlocked session",
+              "Seed encrypted at rest with passcode; CSP headers",
             ],
             [
               "Shared devices",
-              "Anyone with browser access can show seed or send funds",
+              "Someone else uses your unlocked tab",
+              "Sign out; show-seed requires passcode; auto-hide seed",
             ],
             [
               "Host escrow",
-              "On-chain stakes go to the host wallet; host can abscond",
+              "On-chain stakes go to the host wallet",
+              "Clear UI warnings; not a smart-contract escrow",
             ],
             [
               "Invite link leakage",
-              "URLs can include pot details (addresses, signatures, txs)",
+              "Links carry pot details",
+              "Hash fragment (#d=); import confirm; overwrite warn",
             ],
             [
               "Dishonest settle",
               "Host chooses the recorded result",
+              "UI states host authority; social trust only",
             ],
             [
               "RPC privacy",
-              "Public RPCs see your addresses and request timing",
+              "Public RPCs see addresses",
+              "Disclosed in wallet UI and docs",
             ],
           ]}
         />

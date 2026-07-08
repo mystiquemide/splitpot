@@ -73,9 +73,10 @@ export default function WalletsPage() {
       </section>
 
       <DocsNote>
-        Seeds are stored in <code className="font-mono text-xs">sessionStorage</code> for the
-        session. That is convenient, not hardware-grade. Read{" "}
-        <DocsLink href="/docs/security">Security</DocsLink> for the full threat model.
+        Seeds are encrypted with your session passcode (AES-GCM) before sitting in{" "}
+        <code className="font-mono text-xs">sessionStorage</code>. Plaintext seed only lives in
+        memory while unlocked. That is better than plain storage, still not a hardware wallet.
+        Read <DocsLink href="/docs/security">Security</DocsLink> for the full threat model.
       </DocsNote>
 
       <section className="space-y-3">

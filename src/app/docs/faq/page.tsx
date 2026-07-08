@@ -34,7 +34,7 @@ const faqs: { q: string; a: string }[] = [
   },
   {
     q: "Where is my seed stored?",
-    a: "In sessionStorage for the browser session. Back it up offline if you care about the wallet.",
+    a: "Encrypted in a session vault with your passcode. Plaintext only in memory while unlocked. Back it up offline if you care about the wallet.",
   },
   {
     q: "Can I delete a pot?",

@@ -13,15 +13,18 @@ import {
   totalPool,
   winners,
 } from "@/lib/pot"
-import { encodePotShare, getPot, loadWallet, savePot } from "@/lib/store"
+import { buildInviteUrl, getPot, savePot } from "@/lib/store"
 import type { MatchSide, Pot } from "@/lib/types"
 import { buildJoinMessage, buildSettleMessage } from "@/lib/wdk-client"
 import { getUsdtConfig, txUrl } from "@/lib/chain"
+import { getUnlockedWallet, subscribeWallet } from "@/lib/vault"
 
 export function PotRoom({ potId }: { potId: string }) {
   const usdt = getUsdtConfig()
   const [pot, setPot] = useState<Pot | null>(null)
-  const [wallet, setWallet] = useState<ReturnType<typeof loadWallet>>(null)
+  const [wallet, setWallet] = useState<
+    ReturnType<typeof getUnlockedWallet>
+  >(null)
   const [name, setName] = useState("")
   const [pick, setPick] = useState<MatchSide>("home")
   const [result, setResult] = useState<MatchSide>("home")
@@ -43,17 +46,17 @@ export function PotRoom({ potId }: { potId: string }) {
   useEffect(() => {
     const t = window.setTimeout(() => {
       setPot(getPot(potId))
-      setWallet(loadWallet())
+      setWallet(getUnlockedWallet())
       setLoaded(true)
     }, 0)
-    return () => window.clearTimeout(t)
+    const unsub = subscribeWallet(() => setWallet(getUnlockedWallet()))
+    const id = window.setInterval(() => setWallet(getUnlockedWallet()), 1000)
+    return () => {
+      window.clearTimeout(t)
+      window.clearInterval(id)
+      unsub()
+    }
   }, [potId])
-
-  // Keep wallet in sync if user unlocks on this page
-  useEffect(() => {
-    const id = window.setInterval(() => setWallet(loadWallet()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
 
   const plan = useMemo(() => (pot ? payoutPlan(pot) : []), [pot])
   const isHost =
@@ -215,11 +218,10 @@ export function PotRoom({ potId }: { potId: string }) {
 
   async function copyShare() {
     if (!pot) return
-    const encoded = encodePotShare(pot)
-    const url = `${window.location.origin}/import?d=${encodeURIComponent(encoded)}`
+    const url = buildInviteUrl(pot)
     await navigator.clipboard.writeText(url)
     setShareCopied(true)
-    setTimeout(() => setShareCopied(false), 2000)
+    setTimeout(() => setShareCopied(false), 2500)
   }
 
   if (!loaded) {
@@ -302,8 +304,15 @@ export function PotRoom({ potId }: { potId: string }) {
         </div>
         {pot.status === "open" && (
           <p className="mt-4 text-sm text-neutral-600 border-t-2 border-black pt-4 leading-relaxed">
-            Share the invite link so friends can join on their phones. When everyone has joined
+            Share the invite link so friends can join. The link uses a URL hash (not sent to our
+            servers) but still contains pot details. When everyone has joined
             {pot.onChain ? " and sent their stake" : ""}, the host locks picks.
+          </p>
+        )}
+        {pot.onChain && (
+          <p className="mt-3 text-sm border-2 border-black bg-neutral-100 p-3 leading-relaxed text-black">
+            On-chain mode: stakes go to the host wallet ({shortAddr(pot.hostAddress)}). The host
+            temporarily holds funds. Only pot with a host you trust.
           </p>
         )}
       </div>
@@ -475,7 +484,8 @@ export function PotRoom({ potId }: { potId: string }) {
           <div>
             <h2 className="font-display text-xl text-black">Settle full time</h2>
             <p className="text-sm text-neutral-600 mt-1 leading-relaxed">
-              Record the official result. Correct picks split the pool evenly.
+              You alone record the official result. The group must trust this choice. Correct
+              picks split the pool evenly.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

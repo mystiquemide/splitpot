@@ -50,13 +50,18 @@ npm run dev`}</DocsCode>
             Go to <strong className="text-black font-medium">/app</strong>.
           </li>
           <li>
-            Choose <strong className="text-black font-medium">Create WDK wallet</strong>, then sign
-            the unlock message.
+            Set a session passcode (min 8 chars), choose{" "}
+            <strong className="text-black font-medium">Create WDK wallet</strong>, then sign the
+            unlock message.
           </li>
-          <li>Back up the seed phrase offline. It only lives in this browser session.</li>
+          <li>
+            Back up the seed offline (Show seed requires passcode). Vault is encrypted in this
+            browser only.
+          </li>
           <li>Fill match details, stake, and your pick. Leave on-chain off for a dry run.</li>
           <li>
-            Sign and create. On the pot page, copy the <strong className="text-black font-medium">invite link</strong>.
+            Sign and create. On the pot page, copy the{" "}
+            <strong className="text-black font-medium">invite link</strong> (hash-based).
           </li>
           <li>Open the link on another device or profile, create a wallet there, and join.</li>
           <li>As host, lock picks when everyone is in, then settle the result.</li>
@@ -80,9 +85,8 @@ NEXT_PUBLIC_EXPLORER_TX_URL=https://etherscan.io/tx/`}</DocsCode>
       </section>
 
       <DocsNote>
-        Default code fallbacks still use a Sepolia RPC if env is empty. Always pair RPC and token
-        contract to the same chain. See{" "}
-        <DocsLink href="/docs/on-chain">On-chain USDt</DocsLink>.
+        Default RPC (if env is empty) is Ethereum publicnode. Always pair RPC and USDt token on
+        the same chain. See <DocsLink href="/docs/on-chain">On-chain USDt</DocsLink>.
       </DocsNote>
 
       <section className="space-y-3">

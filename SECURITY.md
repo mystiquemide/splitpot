@@ -23,12 +23,15 @@ You should receive an acknowledgment within a few business days. Please give us 
 
 Splitpot is a self-custodial client app:
 
-- Seed phrases and private key material stay in the browser session
+- Seeds are encrypted at rest (AES-GCM + PBKDF2 passcode) in session storage; plaintext only in memory while unlocked
 - Never paste seeds into issues, emails, or pull requests
+- On-chain stakes use host-wallet escrow (not a smart contract)
+- Invite links carry pot metadata; prefer private sharing
 - Do not report social-engineering of third-party RPCs unless it is a Splitpot integration bug
 
 ## Safe practices for users
 
-- Back up your seed offline
-- Clear the browser session when finished on a shared machine
-- Treat share links as sensitive if they contain pot state
+- Use a strong session passcode and back up your seed offline
+- Sign out on shared machines
+- Treat invite links as sensitive
+- Only pot with hosts you trust when on-chain mode is on

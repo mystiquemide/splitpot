@@ -82,9 +82,9 @@ export default function HowItWorksPage() {
         <DocsTable
           headers={["Data", "Storage", "Notes"]}
           rows={[
-            ["Wallet seed", "sessionStorage", "This browser tab session only"],
+            ["Wallet seed", "Encrypted session vault + memory", "Passcode unlock; plain seed not on disk"],
             ["Pot records", "localStorage", "Persists on this browser"],
-            ["Invite link", "URL query", "Base64 pot snapshot for import"],
+            ["Invite link", "URL hash #d=", "Base64 pot snapshot; not sent as query"],
           ]}
         />
         <DocsP>
