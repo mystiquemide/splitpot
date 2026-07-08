@@ -213,8 +213,8 @@ export function WalletBar() {
           <Button variant="outline" size="sm" onClick={() => setShowSeed((v) => !v)}>
             {showSeed ? "Hide seed" : "Show seed"}
           </Button>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            Clear
+          <Button variant="outline" size="sm" onClick={logout}>
+            Sign out
           </Button>
         </div>
       </div>

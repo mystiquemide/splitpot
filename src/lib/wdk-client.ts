@@ -112,12 +112,11 @@ export function buildJoinMessage(params: {
   const lines = [
     "Splitpot — lock your matchday pick",
     "",
-    "You are signing to join a prediction pot.",
+    "You are locking your pick for a Splitpot match pot.",
     "This proves you control this wallet.",
     "",
-    `Pot ID: ${params.potId}`,
+    `Pot: ${params.potTitle || params.potId}`,
   ]
-  if (params.potTitle) lines.push(`Pot: ${params.potTitle}`)
   if (params.homeTeam && params.awayTeam) {
     lines.push(`Match: ${params.homeTeam} vs ${params.awayTeam}`)
   }
@@ -129,13 +128,13 @@ export function buildJoinMessage(params: {
   if (params.onChain && params.tokenAddress) {
     lines.push(
       "",
-      "On-chain mode: after this signature you will be asked to send the stake",
-      `as USDt (${params.tokenAddress}) to the pot host wallet.`
+      "Next step: send the stake as USDt to the host wallet.",
+      `Token: ${params.tokenAddress}`
     )
   } else {
-    lines.push("", "Off-chain commitment only — this signature does not move funds.")
+    lines.push("", "This signature does not move funds by itself.")
   }
-  lines.push("", "If you did not request this, reject and never share your seed.")
+  lines.push("", "If you did not start this, cancel and never share your seed.")
   return lines.join("\n")
 }
 

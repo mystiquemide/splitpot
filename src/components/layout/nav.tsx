@@ -13,13 +13,13 @@ export function Nav() {
         </Link>
         <div className="flex items-center gap-6 font-mono text-[11px] uppercase tracking-wider">
           <Link href="/#how" className="hidden sm:inline text-neutral-600 hover:text-black">
-            Process
+            How it works
           </Link>
           <Link href="/#why" className="hidden sm:inline text-neutral-600 hover:text-black">
-            Proof
+            Why
           </Link>
           <Link href="/app">
-            <Button size="sm">Open app</Button>
+            <Button size="sm">Start a pot</Button>
           </Link>
         </div>
       </div>

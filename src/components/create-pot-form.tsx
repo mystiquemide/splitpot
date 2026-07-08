@@ -21,7 +21,7 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
   const [title, setTitle] = useState<string>(samples[0].title)
   const [stake, setStake] = useState(10)
   const [hostPick, setHostPick] = useState<"home" | "away" | "draw">("home")
-  const [hostName, setHostName] = useState("Host")
+  const [hostName, setHostName] = useState("You")
   const [onChain, setOnChain] = useState(chainReady)
   const [error, setError] = useState<string | null>(null)
   const [signOpen, setSignOpen] = useState(false)
@@ -45,7 +45,21 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
     e.preventDefault()
     setError(null)
     if (onChain && !chainReady) {
-      setError("On-chain mode needs NEXT_PUBLIC_USDT_ADDRESS in env")
+      setError(
+        "On-chain mode isn’t set up. Add NEXT_PUBLIC_USDT_ADDRESS and a matching RPC, or turn off on-chain stakes."
+      )
+      return
+    }
+    if (!hostName.trim()) {
+      setError("Enter your display name.")
+      return
+    }
+    if (!homeTeam.trim() || !awayTeam.trim()) {
+      setError("Enter both team names.")
+      return
+    }
+    if (!(stake > 0)) {
+      setError("Stake must be greater than zero.")
       return
     }
     const id = createPotId()
@@ -94,7 +108,7 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
       participants: [
         {
           address: wallet.address,
-          name: hostName.trim() || "Host",
+          name: hostName.trim() || "You",
           pick: hostPick,
           stake,
           joinedAt: new Date().toISOString(),
@@ -285,9 +299,9 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
           }}
           wallet={wallet}
           title="Sign to create pot"
-          subtitle="WDK personal_sign. Verified before the pot is saved."
+          subtitle="You'll sign your pick with your wallet. We verify it on this device before the pot is saved."
           message={pendingMessage}
-          confirmLabel="Sign & create pot"
+          confirmLabel="Sign and create pot"
           onSigned={onSigned}
         />
       )}
