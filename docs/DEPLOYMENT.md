@@ -11,8 +11,13 @@
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_EVM_RPC_URL` | No | EVM JSON-RPC used by WDK wallet modules. Defaults to a public Sepolia endpoint. |
+| `NEXT_PUBLIC_EVM_RPC_URL` | No | EVM JSON-RPC used by WDK. Must match the USDt token chain. |
 | `NEXT_PUBLIC_APP_URL` | No | Canonical app URL for share links in production. |
+| `NEXT_PUBLIC_USDT_ADDRESS` | For on-chain mode | ERC-20 USDt contract address |
+| `NEXT_PUBLIC_USDT_DECIMALS` | No | Default `6` |
+| `NEXT_PUBLIC_USDT_SYMBOL` | No | Default `USDt` |
+| `NEXT_PUBLIC_CHAIN_NAME` | No | Display name (e.g. Ethereum) |
+| `NEXT_PUBLIC_EXPLORER_TX_URL` | No | Prefix for tx links |
 
 Copy `.env.example` to `.env.local` for local work. Never commit real secrets.
 
