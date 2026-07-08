@@ -48,16 +48,21 @@ Full product docs ship with the app:
   <img src="docs/assets/app.png" alt="Splitpot app with wallet and pot create" width="800" />
 </p>
 
-> Screenshots: see `docs/assets/`. If images are missing in a shallow clone, run the app locally and capture `/` and `/app`.
+<p align="center">
+  <img src="docs/assets/docs.png" alt="Splitpot documentation site" width="800" />
+</p>
+
+> Screenshots: see `docs/assets/`.
 
 ## Features
 
-- **Self-custodial wallets** — create or import a seed with Tether WDK; keys stay in the browser session
-- **Explicit signing** — unlock, create, join, and settle open a sign modal; no silent signatures
-- **Verified attestations** — every join is checked with WDK read-only `verify`
+- **Self-custodial wallets** — Tether WDK; seed encrypted at rest with a session passcode
+- **Explicit signing** — unlock, create, join, and settle open a confirm modal
+- **Verified attestations** — join signatures checked on create and re-checked on import
 - **Equal-stake pots** — same stake for every player, simple winner split
-- **Share links** — export pot state so friends can import on another device
-- **Consumer landing** — clear product story before the app
+- **Invite links** — URL hash payload (not query) so pot data is not sent to server logs
+- **On-chain USDt** — optional host-escrow deposits and WDK payouts with clear trust warnings
+- **Security headers** — CSP and related headers on all routes
 
 ## Tech stack
 
@@ -101,8 +106,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_EVM_RPC_URL` | No | EVM JSON-RPC for WDK. Defaults to a public Sepolia endpoint. |
-| `NEXT_PUBLIC_APP_URL` | No | Canonical URL for production share links. |
+| `NEXT_PUBLIC_EVM_RPC_URL` | No | EVM JSON-RPC for WDK. Defaults to Ethereum publicnode (match USDt chain). |
+| `NEXT_PUBLIC_APP_URL` | No | Canonical origin in production builds for invite links. |
+| `NEXT_PUBLIC_USDT_ADDRESS` | For on-chain | ERC-20 USDt (same chain as RPC). |
 
 See [`.env.example`](./.env.example) and [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 

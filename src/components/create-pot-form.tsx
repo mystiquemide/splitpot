@@ -265,18 +265,27 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
             <span className="block text-xs text-neutral-600 mt-1 leading-relaxed">
               {chainReady && usdt ? (
                 <>
-                  Joiners send stake via WDK to host {shortAddr(wallet.address)}. After settle,
-                  host pays winners on-chain. Token {shortAddr(usdt.address)} on {usdt.chainName}.
+                  Joiners send USDt to host {shortAddr(wallet.address)} via WDK. You temporarily
+                  hold stakes (host escrow, not a smart contract). After settle you pay winners
+                  on-chain. Token {shortAddr(usdt.address)} on {usdt.chainName}. RPC:{" "}
+                  {usdt.chainName} (sees addresses).
                 </>
               ) : (
                 <>
                   Configure <code className="font-mono text-black">NEXT_PUBLIC_USDT_ADDRESS</code>{" "}
-                  and a matching RPC to enable.
+                  and a matching <code className="font-mono text-black">NEXT_PUBLIC_EVM_RPC_URL</code>{" "}
+                  to enable. Both must be the same network.
                 </>
               )}
             </span>
           </span>
         </label>
+        {onChain && chainReady && (
+          <p className="text-xs border-2 border-black bg-black text-white p-3 leading-relaxed">
+            Warning: if you are host, players send you real USDt. Only use this with people who
+            trust you not to withhold funds.
+          </p>
+        )}
 
         {error && (
           <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3">

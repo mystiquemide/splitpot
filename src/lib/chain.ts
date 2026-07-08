@@ -1,5 +1,6 @@
 /**
  * On-chain USDt config. RPC and token must be on the same network.
+ * Defaults intentionally avoid a Sepolia/mainnet mismatch.
  */
 
 export type UsdtConfig = {
@@ -9,6 +10,13 @@ export type UsdtConfig = {
   explorerTx: string
   chainName: string
   rpc: string
+}
+
+/** Default public RPC when env is unset (Ethereum mainnet). */
+export const DEFAULT_EVM_RPC = "https://ethereum-rpc.publicnode.com"
+
+export function getEvmRpcUrl(): string {
+  return process.env.NEXT_PUBLIC_EVM_RPC_URL?.trim() || DEFAULT_EVM_RPC
 }
 
 export function getUsdtConfig(): UsdtConfig | null {
@@ -24,8 +32,8 @@ export function getUsdtConfig(): UsdtConfig | null {
     explorerTx:
       process.env.NEXT_PUBLIC_EXPLORER_TX_URL?.trim() ||
       "https://etherscan.io/tx/",
-    chainName: process.env.NEXT_PUBLIC_CHAIN_NAME?.trim() || "EVM",
-    rpc: process.env.NEXT_PUBLIC_EVM_RPC_URL?.trim() || "https://sepolia.drpc.org",
+    chainName: process.env.NEXT_PUBLIC_CHAIN_NAME?.trim() || "Ethereum",
+    rpc: getEvmRpcUrl(),
   }
 }
 

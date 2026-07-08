@@ -7,10 +7,9 @@ import WalletManagerEvm, {
   WalletAccountReadOnlyEvm,
 } from "@tetherto/wdk-wallet-evm"
 import { SeedSignerEvm } from "@tetherto/wdk-wallet-evm/signers"
-import { getUsdtConfig, toTokenUnits, type UsdtConfig } from "./chain"
+import { getEvmRpcUrl, getUsdtConfig, toTokenUnits, type UsdtConfig } from "./chain"
 
-export const RPC =
-  process.env.NEXT_PUBLIC_EVM_RPC_URL || "https://sepolia.drpc.org"
+export const RPC = getEvmRpcUrl()
 
 type EvmAccount = {
   getAddress: () => Promise<string>

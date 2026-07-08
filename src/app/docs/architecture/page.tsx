@@ -28,7 +28,8 @@ export default function ArchitecturePage() {
 ├── Pot room (/pot/[id])
 ├── Import (/import)
 ├── Docs (/docs)
-├── sessionStorage → wallet seed + address
+├── sessionStorage → encrypted seed vault + address meta
+├── memory → plaintext seed only while unlocked
 ├── localStorage → pot records
 └── Tether WDK → EVM RPC (sign, balance, transfer)`}</DocsCode>
       </section>

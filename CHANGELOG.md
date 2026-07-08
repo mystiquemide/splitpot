@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-07-08
+
+### Security
+
+- Encrypted seed vault (AES-GCM + PBKDF2 passcode); no plaintext seed in sessionStorage
+- Show-seed requires passcode; auto-hides after 30s
+- Invite links use URL hash `#d=` instead of query string
+- Import validates pot schema, warns on overwrite, re-verifies signatures
+- Host escrow and host-settle authority called out in UI
+- Security headers (CSP, frame deny, nosniff, referrer policy)
+- Aligned default RPC to Ethereum publicnode (pair with mainnet USDt)
+
 ## [0.3.0] - 2026-07-08
 
 ### Added
