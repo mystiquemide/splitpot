@@ -26,6 +26,9 @@ export function Footer() {
           <p>Apache 2.0</p>
         </div>
         <div className="flex sm:justify-end gap-6 font-mono text-[11px] uppercase tracking-wider">
+          <Link href="/docs" className="text-neutral-600 hover:text-black">
+            Docs
+          </Link>
           <Link href="/app" className="text-neutral-600 hover:text-black">
             App
           </Link>
