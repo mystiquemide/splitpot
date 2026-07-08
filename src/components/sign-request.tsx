@@ -29,6 +29,9 @@ type Props = {
   onSigned: (result: SignResult) => void | Promise<void>
 }
 
+/**
+ * Sign confirm modal — same ink/paper system as the landing page.
+ */
 export function SignRequest({
   open,
   onClose,
@@ -76,46 +79,46 @@ export function SignRequest({
 
   return (
     <Modal open={open} onClose={handleClose} title={title}>
-      <div className="space-y-4">
+      <div className="space-y-4 bg-white text-black">
         <p className="text-sm text-neutral-600 leading-relaxed">{subtitle}</p>
 
-        <div className="border-2 border-black bg-neutral-50 px-3 py-2">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+        <div className="border-2 border-black bg-[#fafafa] px-3 py-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
             Signing as
           </p>
-          <p className="font-mono text-sm text-black">{shortAddr(wallet.address)}</p>
+          <p className="font-mono text-sm text-black mt-0.5">{shortAddr(wallet.address)}</p>
           <p className="font-mono text-[10px] text-neutral-500 break-all">
             {wallet.address}
           </p>
         </div>
 
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 mb-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500 mb-1">
             Message to sign
           </p>
-          <pre className="max-h-48 overflow-auto border-2 border-black bg-white p-3 text-xs text-black whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="max-h-48 overflow-auto border-2 border-black bg-[#fafafa] p-3 text-xs text-black whitespace-pre-wrap font-mono leading-relaxed">
             {message}
           </pre>
         </div>
 
         {done && (
-          <div className="border-2 border-black bg-neutral-100 p-3 text-sm">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-black">
+          <div className="border-2 border-black bg-black text-white p-3 text-sm">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em]">
               {done.verified ? "Signed and verified" : "Signed"}
             </p>
-            <p className="font-mono text-xs text-neutral-600 mt-1 break-all">
+            <p className="font-mono text-xs text-neutral-300 mt-1 break-all">
               {shortenSig(done.signature, 14)}
             </p>
           </div>
         )}
 
         {error && (
-          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3">
+          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3 text-black">
             {error}
           </p>
         )}
 
-        <div className="flex flex-wrap gap-2 justify-end pt-1 border-t-2 border-black pt-4">
+        <div className="flex flex-wrap gap-2 justify-end border-t-2 border-black pt-4">
           <Button variant="outline" onClick={handleClose} disabled={busy}>
             {done ? "Close" : "Cancel"}
           </Button>

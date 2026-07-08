@@ -83,15 +83,17 @@ export function TransferRequest({
   if (!cfg) {
     return (
       <Modal open={open} onClose={onClose} title="USDt not configured">
-        <p className="text-sm text-neutral-600 leading-relaxed">
-          Set <code className="font-mono text-black">NEXT_PUBLIC_USDT_ADDRESS</code> (and matching
-          RPC) in <code className="font-mono text-black">.env.local</code> to enable on-chain
-          transfers.
-        </p>
-        <div className="mt-4 flex justify-end border-t-2 border-black pt-4">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
+        <div className="space-y-4 bg-white text-black">
+          <p className="text-sm text-neutral-600 leading-relaxed">
+            Set <code className="font-mono text-black">NEXT_PUBLIC_USDT_ADDRESS</code> (and matching
+            RPC) in <code className="font-mono text-black">.env.local</code> to enable on-chain
+            transfers.
+          </p>
+          <div className="flex justify-end border-t-2 border-black pt-4">
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </div>
         </div>
       </Modal>
     )
@@ -144,33 +146,39 @@ export function TransferRequest({
 
   return (
     <Modal open={open} onClose={handleClose} title={title}>
-      <div className="space-y-4">
-        <p className="text-sm text-neutral-600">
+      <div className="space-y-4 bg-white text-black">
+        <p className="text-sm text-neutral-600 leading-relaxed">
           WDK will call ERC-20 <code className="font-mono text-black">transfer</code>. Keys stay on
           this device.
         </p>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="border-2 border-black px-3 py-2">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">From</p>
+          <div className="border-2 border-black bg-[#fafafa] px-3 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+              From
+            </p>
             <p className="font-mono text-sm text-black">{shortAddr(wallet.address)}</p>
           </div>
-          <div className="border-2 border-black px-3 py-2">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">To</p>
+          <div className="border-2 border-black bg-[#fafafa] px-3 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+              To
+            </p>
             <p className="font-mono text-sm text-black">{shortAddr(to)}</p>
           </div>
         </div>
 
-        <div className="border-2 border-black bg-neutral-50 px-4 py-4">
-          <p className="font-display text-3xl text-black leading-none">
+        <div className="border-2 border-black bg-black text-white px-4 py-4">
+          <p className="font-display text-3xl leading-none">
             {amountHuman}{" "}
-            <span className="font-mono text-sm tracking-wider">{cfg.symbol}</span>
+            <span className="font-mono text-sm tracking-wider text-neutral-300">
+              {cfg.symbol}
+            </span>
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 mt-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-400 mt-2">
             {cfg.chainName} · {shortAddr(cfg.address)}
           </p>
           {balance != null && (
-            <p className="font-mono text-xs text-neutral-600 mt-2">
+            <p className="font-mono text-xs text-neutral-300 mt-2">
               Balance: {balance} {cfg.symbol}
             </p>
           )}
@@ -179,13 +187,13 @@ export function TransferRequest({
           )}
         </div>
 
-        <pre className="max-h-36 overflow-auto border-2 border-black bg-white p-3 text-xs text-neutral-700 whitespace-pre-wrap font-mono">
+        <pre className="max-h-36 overflow-auto border-2 border-black bg-[#fafafa] p-3 text-xs text-black whitespace-pre-wrap font-mono">
           {summary}
         </pre>
 
         {done && (
-          <div className="border-2 border-black bg-neutral-100 p-3 text-sm space-y-1">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-black">
+          <div className="border-2 border-black bg-[#fafafa] p-3 text-sm space-y-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black">
               Transaction sent
             </p>
             <p className="font-mono text-xs text-neutral-600 break-all">
@@ -195,7 +203,7 @@ export function TransferRequest({
               href={txUrl(done.hash, cfg.explorerTx)}
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-xs underline underline-offset-2"
+              className="font-mono text-xs text-black underline underline-offset-4"
             >
               View on explorer
             </a>
@@ -203,7 +211,7 @@ export function TransferRequest({
         )}
 
         {error && (
-          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3 break-words">
+          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3 text-black break-words">
             {error}
           </p>
         )}
