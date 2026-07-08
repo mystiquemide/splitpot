@@ -44,13 +44,35 @@ Optional env:
 NEXT_PUBLIC_EVM_RPC_URL=https://sepolia.drpc.org
 ```
 
+## Product surfaces
+
+| URL | What |
+|-----|------|
+| `/` | Consumer landing page |
+| `/app` | Create wallet, open pots |
+| `/pot/[id]` | Join, lock, settle |
+| `/import?d=…` | Import shared pot |
+
+## Real wallet signing
+
+Every sensitive action opens a **SignRequest** modal:
+
+1. User reads the full message (pot, pick, stake, address)
+2. User clicks **Sign with WDK** (no silent signing)
+3. `account.sign(message)` runs via `@tetherto/wdk-wallet-evm`
+4. Signature is **verified** with `WalletAccountReadOnlyEvm.verify()`
+5. Only then is the action saved
+
+Actions gated: unlock wallet · create pot · join pot · settle pot.
+
 ## Demo path (judges, under 3 minutes)
 
-1. **Create WDK wallet** on the home page  
-2. **Create pot** (pick a sample match, stake, your pick)  
-3. **Add demo friend** (generates a second WDK wallet, joins with opposite pick)  
-4. **Lock picks** → **Settle** with a result  
-5. See **payout plan** and mark paid  
+1. Open `/` → **Open app**
+2. **Create WDK wallet** → sign unlock challenge
+3. **Create pot** → review message → sign
+4. **Add demo friend** (second wallet, sign + verify)
+5. **Lock picks** → **Review & sign to settle**
+6. See **payout plan** and mark paid
 
 Share link copies pot state so another browser can import it.
 

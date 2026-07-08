@@ -2,9 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { SignRequest } from "@/components/sign-request"
 import { clearWallet, loadWallet, saveWallet } from "@/lib/store"
 import type { LocalWallet } from "@/lib/types"
-import { generateSeedPhrase, getAddressFromSeed, isValidSeedPhrase } from "@/lib/wdk-client"
+import {
+  buildWalletUnlockMessage,
+  generateSeedPhrase,
+  getAddressFromSeed,
+  isValidSeedPhrase,
+  shortenSig,
+} from "@/lib/wdk-client"
 import { shortAddr } from "@/lib/pot"
 
 export function WalletBar() {
@@ -14,25 +21,23 @@ export function WalletBar() {
   const [importOpen, setImportOpen] = useState(false)
   const [importSeed, setImportSeed] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [signOpen, setSignOpen] = useState(false)
+  const [pendingSeed, setPendingSeed] = useState<string | null>(null)
+  const [pendingAddress, setPendingAddress] = useState<string | null>(null)
 
   useEffect(() => {
     setWallet(loadWallet())
   }, [])
 
-  async function createWallet() {
+  async function prepareCreate() {
     setBusy(true)
     setError(null)
     try {
       const seedPhrase = generateSeedPhrase()
       const address = await getAddressFromSeed(seedPhrase)
-      const w: LocalWallet = {
-        address,
-        seedPhrase,
-        createdAt: new Date().toISOString(),
-      }
-      saveWallet(w)
-      setWallet(w)
-      setShowSeed(true)
+      setPendingSeed(seedPhrase)
+      setPendingAddress(address)
+      setSignOpen(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create wallet")
     } finally {
@@ -40,7 +45,7 @@ export function WalletBar() {
     }
   }
 
-  async function importWallet() {
+  async function prepareImport() {
     setBusy(true)
     setError(null)
     try {
@@ -50,15 +55,9 @@ export function WalletBar() {
         return
       }
       const address = await getAddressFromSeed(seed)
-      const w: LocalWallet = {
-        address,
-        seedPhrase: seed,
-        createdAt: new Date().toISOString(),
-      }
-      saveWallet(w)
-      setWallet(w)
-      setImportOpen(false)
-      setImportSeed("")
+      setPendingSeed(seed)
+      setPendingAddress(address)
+      setSignOpen(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import failed")
     } finally {
@@ -72,49 +71,109 @@ export function WalletBar() {
     setShowSeed(false)
   }
 
+  const unlockWallet: LocalWallet | null =
+    pendingSeed && pendingAddress
+      ? {
+          address: pendingAddress,
+          seedPhrase: pendingSeed,
+          createdAt: new Date().toISOString(),
+        }
+      : null
+
   if (!wallet) {
     return (
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
-        <p className="text-sm text-gray-300 mb-3">
-          Self-custodial wallet via <span className="text-emerald-400">Tether WDK</span>. Keys stay in this browser session.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={createWallet} disabled={busy}>
-            {busy ? "Creating…" : "Create WDK wallet"}
-          </Button>
-          <Button variant="outline" onClick={() => setImportOpen((v) => !v)} disabled={busy}>
-            Import seed
-          </Button>
-        </div>
-        {importOpen && (
-          <div className="mt-3 space-y-2">
-            <textarea
-              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm"
-              rows={3}
-              placeholder="twelve word seed phrase…"
-              value={importSeed}
-              onChange={(e) => setImportSeed(e.target.value)}
-            />
-            <Button size="sm" onClick={importWallet} disabled={busy}>
-              Import
+      <>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-5">
+          <p className="text-sm font-medium text-white mb-1">Self-custodial wallet</p>
+          <p className="text-sm text-gray-400 mb-4">
+            Powered by <span className="text-emerald-400">Tether WDK</span>. Create or import a
+            seed, then <strong className="text-gray-200 font-medium">sign a challenge</strong> to
+            prove you control the keys. Nothing is sent to a server.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={prepareCreate} disabled={busy} className="rounded-full">
+              {busy ? "Preparing…" : "Create WDK wallet"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setImportOpen((v) => !v)}
+              disabled={busy}
+              className="rounded-full"
+            >
+              Import seed
             </Button>
           </div>
+          {importOpen && (
+            <div className="mt-3 space-y-2">
+              <textarea
+                className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm"
+                rows={3}
+                placeholder="twelve word seed phrase…"
+                value={importSeed}
+                onChange={(e) => setImportSeed(e.target.value)}
+              />
+              <Button size="sm" onClick={prepareImport} disabled={busy} className="rounded-full">
+                Continue to sign
+              </Button>
+            </div>
+          )}
+          {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+        </div>
+
+        {unlockWallet && (
+          <SignRequest
+            open={signOpen}
+            onClose={() => {
+              setSignOpen(false)
+              setPendingSeed(null)
+              setPendingAddress(null)
+            }}
+            wallet={unlockWallet}
+            title="Activate wallet"
+            subtitle="Sign this challenge with WDK to prove key control. Required before using Splitpot."
+            message={buildWalletUnlockMessage(unlockWallet.address)}
+            confirmLabel="Sign to unlock"
+            onSigned={(result) => {
+              const w: LocalWallet = {
+                ...unlockWallet,
+                unlockSignature: result.signature,
+                unlockedAt: new Date().toISOString(),
+              }
+              saveWallet(w)
+              setWallet(w)
+              setShowSeed(true)
+              setSignOpen(false)
+              setPendingSeed(null)
+              setPendingAddress(null)
+              setImportOpen(false)
+              setImportSeed("")
+            }}
+          />
         )}
-        {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
-      </div>
+      </>
     )
   }
 
   return (
-    <div className="rounded-xl border border-emerald-900/50 bg-emerald-950/20 p-4">
+    <div className="rounded-2xl border border-emerald-900/50 bg-emerald-950/20 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-wide text-emerald-500">WDK wallet</p>
+          <p className="text-xs uppercase tracking-wide text-emerald-500">WDK wallet · unlocked</p>
           <p className="font-mono text-sm text-white">{shortAddr(wallet.address)}</p>
           <p className="text-xs text-gray-500 break-all mt-1">{wallet.address}</p>
+          {wallet.unlockSignature && (
+            <p className="text-xs text-emerald-500/80 mt-1 font-mono">
+              unlock sig {shortenSig(wallet.unlockSignature, 8)}
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowSeed((v) => !v)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSeed((v) => !v)}
+            className="rounded-full"
+          >
             {showSeed ? "Hide seed" : "Show seed"}
           </Button>
           <Button variant="ghost" size="sm" onClick={logout}>

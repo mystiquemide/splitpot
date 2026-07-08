@@ -9,8 +9,12 @@ export interface Participant {
   /** Stake amount in whole USDt units (display). Commitment is local for demo. */
   stake: number
   joinedAt: string
-  /** WDK-signed join attestation (hex). Proves self-custodial control. */
+  /** WDK personal_sign hex. Proves self-custodial control. */
   signature: string
+  /** True when signature verified with WDK read-only verify() */
+  verified?: boolean
+  /** Exact message that was signed (for re-verify) */
+  signedMessage?: string
   paidOut?: boolean
   payoutTxHash?: string
 }
@@ -29,6 +33,9 @@ export interface Pot {
   participants: Participant[]
   /** Winning side after host settles */
   result?: MatchSide
+  /** Host settle signature */
+  settleSignature?: string
+  settleMessage?: string
   createdAt: string
   settledAt?: string
 }
@@ -38,4 +45,7 @@ export interface LocalWallet {
   /** Demo only: seed kept in sessionStorage. Never send to a server. */
   seedPhrase: string
   createdAt: string
+  /** Optional unlock proof from first sign */
+  unlockSignature?: string
+  unlockedAt?: string
 }
