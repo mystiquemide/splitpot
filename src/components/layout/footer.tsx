@@ -9,7 +9,7 @@ export function Footer() {
             Splitpot
           </p>
           <p className="font-display text-2xl text-black leading-none">
-            Matchday pots.
+            Matchday pots, self-custodial.
           </p>
         </div>
         <div className="font-mono text-[11px] uppercase tracking-wider text-neutral-600 space-y-1 sm:text-center">
@@ -41,7 +41,7 @@ export function Footer() {
       </div>
       <div className="border-t border-black">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-          Vol. 01 · Self-custodial · No cloud AI · Keys on device
+          Keys stay on your device · No cloud AI
         </div>
       </div>
     </footer>

@@ -89,7 +89,7 @@ export function TransferRequest({
           transfers.
         </p>
         <div className="mt-4 flex justify-end border-t-2 border-black pt-4">
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -209,8 +209,8 @@ export function TransferRequest({
         )}
 
         <div className="flex flex-wrap gap-2 justify-end border-t-2 border-black pt-4">
-          <Button variant="ghost" onClick={handleClose} disabled={busy}>
-            {done ? "Done" : "Cancel"}
+          <Button variant="outline" onClick={handleClose} disabled={busy}>
+            {done ? "Close" : "Cancel"}
           </Button>
           {!done && (
             <Button onClick={() => handleSend(cfg)} disabled={busy}>

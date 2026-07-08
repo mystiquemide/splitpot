@@ -116,8 +116,8 @@ export function SignRequest({
         )}
 
         <div className="flex flex-wrap gap-2 justify-end pt-1 border-t-2 border-black pt-4">
-          <Button variant="ghost" onClick={handleClose} disabled={busy}>
-            {done ? "Done" : "Reject"}
+          <Button variant="outline" onClick={handleClose} disabled={busy}>
+            {done ? "Close" : "Cancel"}
           </Button>
           {!done && (
             <Button onClick={handleSign} disabled={busy}>
