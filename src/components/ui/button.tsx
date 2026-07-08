@@ -5,18 +5,27 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "md" | "lg"
 }
 
-export function Button({ variant = "primary", size = "md", className, ...props }: ButtonProps) {
+export function Button({
+  variant = "primary",
+  size = "md",
+  className,
+  ...props
+}: ButtonProps) {
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-lg font-medium transition-colors",
-        variant === "primary" && "bg-white text-black hover:bg-gray-200",
-        variant === "secondary" && "bg-gray-800 text-white hover:bg-gray-700",
-        variant === "outline" && "border border-gray-700 text-white hover:bg-gray-800",
-        variant === "ghost" && "text-gray-400 hover:text-white",
-        size === "sm" && "px-3 py-1.5 text-sm",
-        size === "md" && "px-4 py-2 text-sm",
-        size === "lg" && "px-6 py-3 text-base",
+        "inline-flex items-center justify-center font-mono uppercase tracking-wider transition-none border-2 border-black disabled:opacity-40 disabled:cursor-not-allowed",
+        variant === "primary" &&
+          "bg-black text-white hover:bg-neutral-800 shadow-[3px_3px_0_0_#0a0a0a]",
+        variant === "secondary" &&
+          "bg-neutral-100 text-black hover:bg-neutral-200 shadow-[3px_3px_0_0_#0a0a0a]",
+        variant === "outline" &&
+          "bg-white text-black hover:bg-neutral-50 shadow-[3px_3px_0_0_#0a0a0a]",
+        variant === "ghost" &&
+          "border-transparent bg-transparent text-neutral-600 hover:text-black shadow-none tracking-normal normal-case font-sans",
+        size === "sm" && "px-3 py-1.5 text-[10px]",
+        size === "md" && "px-4 py-2 text-[11px]",
+        size === "lg" && "px-6 py-3 text-xs",
         className
       )}
       {...props}

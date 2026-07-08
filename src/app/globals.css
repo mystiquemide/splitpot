@@ -1,15 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030712;
-  --foreground: #f3f4f6;
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --muted: #525252;
+  --border: #0a0a0a;
+  --paper: #ffffff;
+  --ink: #0a0a0a;
+  --rule: #0a0a0a;
+  --haze: #e5e5e5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
 html {
@@ -19,11 +26,78 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
-/* subtle selection */
+/* Newspaper ink selection */
 ::selection {
-  background: rgba(16, 185, 129, 0.35);
-  color: #fff;
+  background: #0a0a0a;
+  color: #fafafa;
+}
+
+/* Editorial utilities */
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, "Courier New", monospace;
+}
+
+.rule {
+  border-color: var(--rule);
+}
+
+.paper {
+  background: var(--paper);
+}
+
+.ink {
+  color: var(--ink);
+}
+
+/* Hairline double rule (masthead) */
+.double-rule {
+  border-top: 3px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+/* Proof card — sharp, stamped */
+.proof-card {
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 0 var(--ink);
+}
+
+.proof-card-flat {
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+/* Label stamp */
+.stamp {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  padding: 0.2rem 0.45rem;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+/* Form controls */
+input,
+textarea,
+select {
+  border-radius: 0 !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }

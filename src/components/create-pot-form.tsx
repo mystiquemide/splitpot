@@ -116,13 +116,13 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
 
   return (
     <>
-      <form
-        onSubmit={onPrepare}
-        className="space-y-4 rounded-2xl border border-gray-800 bg-gray-900/40 p-5"
-      >
-        <div>
-          <h2 className="text-lg font-semibold text-white">Create matchday pot</h2>
-          <p className="text-sm text-gray-400">
+      <form onSubmit={onPrepare} className="space-y-5 proof-card-flat p-6">
+        <div className="border-b-2 border-black pb-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-1">
+            New pot
+          </p>
+          <h2 className="font-display text-3xl text-black leading-tight">Create matchday pot</h2>
+          <p className="text-sm text-neutral-600 mt-2">
             Equal stake. Sign your pick with WDK. Optional on-chain USDt stakes.
           </p>
         </div>
@@ -133,7 +133,7 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
               key={s.title}
               type="button"
               onClick={() => applySample(i)}
-              className="rounded-full border border-gray-700 px-3 py-1 text-xs text-gray-300 hover:border-emerald-600 hover:text-white"
+              className="font-mono text-[10px] uppercase tracking-wider border-2 border-black px-3 py-1.5 text-black hover:bg-black hover:text-white"
             >
               {s.homeTeam}–{s.awayTeam}
             </button>
@@ -142,18 +142,22 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-sm">
-            <span className="text-gray-400">Home</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+              Home
+            </span>
             <input
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2"
+              className="mt-1 w-full border-2 border-black bg-white px-3 py-2 text-black"
               value={homeTeam}
               onChange={(e) => setHomeTeam(e.target.value)}
               required
             />
           </label>
           <label className="block text-sm">
-            <span className="text-gray-400">Away</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+              Away
+            </span>
             <input
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2"
+              className="mt-1 w-full border-2 border-black bg-white px-3 py-2 text-black"
               value={awayTeam}
               onChange={(e) => setAwayTeam(e.target.value)}
               required
@@ -162,9 +166,11 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
         </div>
 
         <label className="block text-sm">
-          <span className="text-gray-400">Pot title</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+            Pot title
+          </span>
           <input
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2"
+            className="mt-1 w-full border-2 border-black bg-white px-3 py-2 text-black"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -172,22 +178,26 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-sm">
-            <span className="text-gray-400">Stake (USDt each)</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+              Stake (USDt each)
+            </span>
             <input
               type="number"
               min={0.01}
               step="any"
               max={100000}
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2"
+              className="mt-1 w-full border-2 border-black bg-white px-3 py-2 text-black font-mono"
               value={stake}
               onChange={(e) => setStake(Number(e.target.value))}
               required
             />
           </label>
           <label className="block text-sm">
-            <span className="text-gray-400">Your name</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+              Your name
+            </span>
             <input
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2"
+              className="mt-1 w-full border-2 border-black bg-white px-3 py-2 text-black"
               value={hostName}
               onChange={(e) => setHostName(e.target.value)}
             />
@@ -195,7 +205,9 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
         </div>
 
         <fieldset>
-          <legend className="text-sm text-gray-400 mb-2">Your pick</legend>
+          <legend className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 mb-2">
+            Your pick
+          </legend>
           <div className="flex flex-wrap gap-2">
             {(
               [
@@ -208,10 +220,10 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
                 key={value}
                 type="button"
                 onClick={() => setHostPick(value)}
-                className={`rounded-lg border px-4 py-2 text-sm ${
+                className={`border-2 border-black px-4 py-2 text-sm font-mono uppercase tracking-wide ${
                   hostPick === value
-                    ? "border-emerald-500 bg-emerald-950/40 text-emerald-300"
-                    : "border-gray-700 text-gray-300"
+                    ? "bg-black text-white"
+                    : "bg-white text-black hover:bg-neutral-100"
                 }`}
               >
                 {label}
@@ -221,24 +233,22 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
         </fieldset>
 
         <label
-          className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer ${
-            onChain && chainReady
-              ? "border-emerald-800/60 bg-emerald-950/20"
-              : "border-gray-800 bg-gray-950/40"
+          className={`flex items-start gap-3 border-2 border-black p-4 cursor-pointer ${
+            onChain && chainReady ? "bg-neutral-100" : "bg-white"
           }`}
         >
           <input
             type="checkbox"
-            className="mt-1"
+            className="mt-1 accent-black"
             checked={Boolean(onChain && chainReady)}
             disabled={!chainReady}
             onChange={(e) => setOnChain(e.target.checked)}
           />
           <span>
-            <span className="block text-sm font-medium text-white">
+            <span className="block font-mono text-xs uppercase tracking-wider text-black">
               On-chain USDt stakes
             </span>
-            <span className="block text-xs text-gray-400 mt-1 leading-relaxed">
+            <span className="block text-xs text-neutral-600 mt-1 leading-relaxed">
               {chainReady && usdt ? (
                 <>
                   Joiners send stake via WDK to host {shortAddr(wallet.address)}. After settle,
@@ -246,17 +256,21 @@ export function CreatePotForm({ wallet }: { wallet: LocalWallet }) {
                 </>
               ) : (
                 <>
-                  Configure <code className="text-gray-300">NEXT_PUBLIC_USDT_ADDRESS</code> and a
-                  matching RPC to enable.
+                  Configure <code className="font-mono text-black">NEXT_PUBLIC_USDT_ADDRESS</code>{" "}
+                  and a matching RPC to enable.
                 </>
               )}
             </span>
           </span>
         </label>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <p className="font-mono text-xs uppercase tracking-wide border-l-2 border-black pl-3">
+            {error}
+          </p>
+        )}
 
-        <Button type="submit" className="w-full sm:w-auto rounded-full">
+        <Button type="submit" className="w-full sm:w-auto">
           Review & sign to create
         </Button>
       </form>

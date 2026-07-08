@@ -1,12 +1,28 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Instrument_Serif, IBM_Plex_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { Nav } from "@/components/layout/nav"
 import { Footer } from "@/components/layout/footer"
 import { ToastProvider } from "@/components/ui/toast"
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] })
+const display = Instrument_Serif({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+})
+
+const mono = IBM_Plex_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+})
+
+const body = Inter({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+})
 
 export const metadata: Metadata = {
   title: "Splitpot — matchday pots, self-custodial",
@@ -16,8 +32,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}>
-      <body className="min-h-full bg-gray-950 text-gray-100 flex flex-col font-sans">
+    <html
+      lang="en"
+      className={`${display.variable} ${mono.variable} ${body.variable} h-full`}
+    >
+      <body className="min-h-full bg-[var(--background)] text-[var(--foreground)] flex flex-col antialiased">
         <ToastProvider>
           <Nav />
           <main className="flex-1">{children}</main>
