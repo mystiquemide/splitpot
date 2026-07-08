@@ -9,10 +9,12 @@ import {
   buildWalletUnlockMessage,
   generateSeedPhrase,
   getAddressFromSeed,
+  getUsdtBalance,
   isValidSeedPhrase,
   shortenSig,
 } from "@/lib/wdk-client"
 import { shortAddr } from "@/lib/pot"
+import { formatTokenUnits, getUsdtConfig } from "@/lib/chain"
 
 export function WalletBar() {
   const [wallet, setWallet] = useState<LocalWallet | null>(null)
@@ -24,11 +26,33 @@ export function WalletBar() {
   const [signOpen, setSignOpen] = useState(false)
   const [pendingSeed, setPendingSeed] = useState<string | null>(null)
   const [pendingAddress, setPendingAddress] = useState<string | null>(null)
+  const [usdtBal, setUsdtBal] = useState<string | null>(null)
+  const usdt = getUsdtConfig()
 
   useEffect(() => {
     const t = window.setTimeout(() => setWallet(loadWallet()), 0)
     return () => window.clearTimeout(t)
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    const t = window.setTimeout(async () => {
+      if (!wallet || !usdt) {
+        if (!cancelled) setUsdtBal(null)
+        return
+      }
+      try {
+        const bal = await getUsdtBalance(wallet.seedPhrase, usdt)
+        if (!cancelled) setUsdtBal(formatTokenUnits(bal, usdt.decimals))
+      } catch {
+        if (!cancelled) setUsdtBal(null)
+      }
+    }, 0)
+    return () => {
+      cancelled = true
+      window.clearTimeout(t)
+    }
+  }, [wallet, usdt])
 
   async function prepareCreate() {
     setBusy(true)
@@ -165,6 +189,12 @@ export function WalletBar() {
           {wallet.unlockSignature && (
             <p className="text-xs text-emerald-500/80 mt-1 font-mono">
               unlock sig {shortenSig(wallet.unlockSignature, 8)}
+            </p>
+          )}
+          {usdt && usdtBal != null && (
+            <p className="text-xs text-gray-300 mt-1">
+              {usdtBal} {usdt.symbol}
+              <span className="text-gray-500"> · {usdt.chainName}</span>
             </p>
           )}
         </div>

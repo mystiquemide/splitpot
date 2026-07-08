@@ -67,14 +67,33 @@ sequenceDiagram
   S-->>U: updated pot / wallet state
 ```
 
+## On-chain USDt flow
+
+```mermaid
+sequenceDiagram
+  participant J as Joiner
+  participant W as WDK
+  participant H as Host wallet
+  participant C as ERC-20 USDt
+
+  J->>W: sign pick message
+  J->>W: transfer(stake) to host
+  W->>C: ERC-20 transfer
+  C-->>H: stake received
+  Note over H: After full-time settle
+  H->>W: transfer(payout) to winner
+  W->>C: ERC-20 transfer
+```
+
 ## Layers
 
 | Layer | Responsibility |
 |-------|----------------|
 | Landing | Product positioning and entry to the app |
 | App shell | Wallet unlock, pot list, create pot |
-| Pot room | Join, lock, settle, payout plan |
-| WDK client | Seed, address, sign, verify, optional send |
+| Pot room | Join, lock, settle, deposit, payout |
+| WDK client | Seed, address, sign, verify, ERC-20 transfer |
+| Chain config | Token address, decimals, explorer |
 | Store | Session wallet + durable pot list |
 
 ## Design decisions

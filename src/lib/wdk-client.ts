@@ -7,6 +7,7 @@ import WalletManagerEvm, {
   WalletAccountReadOnlyEvm,
 } from "@tetherto/wdk-wallet-evm"
 import { SeedSignerEvm } from "@tetherto/wdk-wallet-evm/signers"
+import { getUsdtConfig, toTokenUnits, type UsdtConfig } from "./chain"
 
 export const RPC =
   process.env.NEXT_PUBLIC_EVM_RPC_URL || "https://sepolia.drpc.org"
@@ -18,7 +19,18 @@ type EvmAccount = {
     to: string
     value: bigint
   }) => Promise<{ hash: string }>
+  transfer: (params: {
+    token: string
+    recipient: string
+    amount: bigint
+  }) => Promise<{ hash: string; fee?: bigint }>
+  quoteTransfer?: (params: {
+    token: string
+    recipient: string
+    amount: bigint
+  }) => Promise<{ fee: bigint }>
   getBalance: () => Promise<bigint>
+  getTokenBalance: (token: string) => Promise<bigint>
   dispose?: () => void
 }
 
@@ -60,7 +72,6 @@ export async function signMessageWithWdk(
   return withAccount(seedPhrase, async (account) => account.sign(message))
 }
 
-/** @deprecated use signMessageWithWdk */
 export async function signJoinMessage(
   seedPhrase: string,
   message: string
@@ -68,10 +79,6 @@ export async function signJoinMessage(
   return signMessageWithWdk(seedPhrase, message)
 }
 
-/**
- * Verify a signature against an address using WDK read-only account.
- * This is real crypto verification, not a UI checkbox.
- */
 export async function verifySignature(
   address: string,
   message: string,
@@ -99,12 +106,14 @@ export function buildJoinMessage(params: {
   pickLabel?: string
   stake: number
   address: string
+  onChain?: boolean
+  tokenAddress?: string
 }): string {
   const lines = [
     "Splitpot — lock your matchday pick",
     "",
     "You are signing to join a prediction pot.",
-    "This proves you control this wallet. It does not move funds by itself.",
+    "This proves you control this wallet.",
     "",
     `Pot ID: ${params.potId}`,
   ]
@@ -114,11 +123,19 @@ export function buildJoinMessage(params: {
   }
   lines.push(
     `Pick: ${params.pickLabel || params.pick}`,
-    `Stake: ${params.stake} USDt (commitment)`,
-    `Wallet: ${params.address}`,
-    "",
-    "If you did not request this, reject and never share your seed."
+    `Stake: ${params.stake} USDt`,
+    `Wallet: ${params.address}`
   )
+  if (params.onChain && params.tokenAddress) {
+    lines.push(
+      "",
+      "On-chain mode: after this signature you will be asked to send the stake",
+      `as USDt (${params.tokenAddress}) to the pot host wallet.`
+    )
+  } else {
+    lines.push("", "Off-chain commitment only — this signature does not move funds.")
+  }
+  lines.push("", "If you did not request this, reject and never share your seed.")
   return lines.join("\n")
 }
 
@@ -152,19 +169,116 @@ export function buildSettleMessage(params: {
   ].join("\n")
 }
 
-export async function sendNativePayout(
-  seedPhrase: string,
-  to: string,
-  amountWei: bigint
-): Promise<{ hash: string }> {
-  return withAccount(seedPhrase, async (account) => {
-    const result = await account.sendTransaction({ to, value: amountWei })
-    return { hash: result.hash }
-  })
+export function buildTransferSummary(params: {
+  kind: "deposit" | "payout"
+  amount: number
+  symbol: string
+  to: string
+  potId: string
+  token: string
+  chainName: string
+}): string {
+  const title =
+    params.kind === "deposit"
+      ? "Splitpot — send stake (USDt)"
+      : "Splitpot — pay winner (USDt)"
+  return [
+    title,
+    "",
+    `Amount: ${params.amount} ${params.symbol}`,
+    `To: ${params.to}`,
+    `Token: ${params.token}`,
+    `Network: ${params.chainName}`,
+    `Pot: ${params.potId}`,
+    "",
+    "This broadcasts an on-chain ERC-20 transfer via Tether WDK.",
+    "You need enough token balance and native gas for fees.",
+  ].join("\n")
 }
 
 export async function getNativeBalance(seedPhrase: string): Promise<bigint> {
   return withAccount(seedPhrase, async (account) => account.getBalance())
+}
+
+export async function getUsdtBalance(
+  seedPhrase: string,
+  config?: UsdtConfig | null
+): Promise<bigint> {
+  const cfg = config ?? getUsdtConfig()
+  if (!cfg) throw new Error("USDt is not configured")
+  return withAccount(seedPhrase, async (account) =>
+    account.getTokenBalance(cfg.address)
+  )
+}
+
+export async function getUsdtBalanceByAddress(
+  address: string,
+  config?: UsdtConfig | null
+): Promise<bigint> {
+  const cfg = config ?? getUsdtConfig()
+  if (!cfg) throw new Error("USDt is not configured")
+  const readOnly = new WalletAccountReadOnlyEvm(address, { provider: RPC })
+  return (
+    readOnly as unknown as { getTokenBalance: (t: string) => Promise<bigint> }
+  ).getTokenBalance(cfg.address)
+}
+
+/**
+ * On-chain ERC-20 transfer via WDK. Only call after user confirms in UI.
+ */
+export async function transferUsdt(params: {
+  seedPhrase: string
+  to: string
+  amountHuman: number
+  config?: UsdtConfig | null
+}): Promise<{ hash: string; amountUnits: bigint }> {
+  const cfg = params.config ?? getUsdtConfig()
+  if (!cfg) throw new Error("USDt is not configured (set NEXT_PUBLIC_USDT_ADDRESS)")
+  if (!/^0x[a-fA-F0-9]{40}$/.test(params.to)) {
+    throw new Error("Invalid recipient address")
+  }
+  const amountUnits = toTokenUnits(params.amountHuman, cfg.decimals)
+  if (amountUnits <= BigInt(0)) throw new Error("Amount must be greater than zero")
+
+  return withAccount(params.seedPhrase, async (account) => {
+    const balance = await account.getTokenBalance(cfg.address)
+    if (balance < amountUnits) {
+      throw new Error(
+        `Insufficient ${cfg.symbol} balance (have ${balance.toString()} base units, need ${amountUnits.toString()})`
+      )
+    }
+    const result = await account.transfer({
+      token: cfg.address,
+      recipient: params.to,
+      amount: amountUnits,
+    })
+    if (!result?.hash) throw new Error("Transfer returned no transaction hash")
+    return { hash: result.hash as string, amountUnits }
+  })
+}
+
+export async function quoteUsdtTransfer(params: {
+  seedPhrase: string
+  to: string
+  amountHuman: number
+  config?: UsdtConfig | null
+}): Promise<{ fee?: bigint } | null> {
+  const cfg = params.config ?? getUsdtConfig()
+  if (!cfg) return null
+  const amountUnits = toTokenUnits(params.amountHuman, cfg.decimals)
+  try {
+    return await withAccount(params.seedPhrase, async (account) => {
+      if (!account.quoteTransfer) return null
+      const q = await account.quoteTransfer({
+        token: cfg.address,
+        recipient: params.to,
+        amount: amountUnits,
+      })
+      return { fee: q.fee }
+    })
+  } catch {
+    return null
+  }
 }
 
 export function shortenSig(sig: string, n = 10): string {

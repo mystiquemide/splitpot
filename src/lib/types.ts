@@ -6,7 +6,7 @@ export interface Participant {
   address: string
   name: string
   pick: MatchSide
-  /** Stake amount in whole USDt units (display). Commitment recorded in the pot. */
+  /** Stake amount in whole USDt units (display). */
   stake: number
   joinedAt: string
   /** WDK personal_sign hex. Proves self-custodial control. */
@@ -15,6 +15,9 @@ export interface Participant {
   verified?: boolean
   /** Exact message that was signed (for re-verify) */
   signedMessage?: string
+  /** On-chain stake deposit to host (if pot.onChain) */
+  depositTxHash?: string
+  depositConfirmed?: boolean
   paidOut?: boolean
   payoutTxHash?: string
 }
@@ -24,16 +27,18 @@ export interface Pot {
   title: string
   homeTeam: string
   awayTeam: string
-  /** Kickoff ISO string */
   kickoff: string
   stake: number
   currency: "USDt"
   hostAddress: string
   status: PotStatus
   participants: Participant[]
-  /** Winning side after host settles */
+  /** When true, stakes and payouts use WDK ERC-20 USDt transfers */
+  onChain?: boolean
+  /** Token contract used for this pot (copied from env at create time) */
+  tokenAddress?: string
+  chainName?: string
   result?: MatchSide
-  /** Host settle signature */
   settleSignature?: string
   settleMessage?: string
   createdAt: string
@@ -42,10 +47,8 @@ export interface Pot {
 
 export interface LocalWallet {
   address: string
-  /** Seed kept in sessionStorage only. Never send to a server. */
   seedPhrase: string
   createdAt: string
-  /** Optional unlock proof from first sign */
   unlockSignature?: string
   unlockedAt?: string
 }

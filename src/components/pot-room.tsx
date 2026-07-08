@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SignRequest, type SignResult } from "@/components/sign-request"
+import { TransferRequest, type TransferResult } from "@/components/transfer-request"
 import {
   canJoin,
   payoutPlan,
@@ -23,8 +24,10 @@ import {
   verifySignature,
   shortenSig,
 } from "@/lib/wdk-client"
+import { getUsdtConfig, txUrl } from "@/lib/chain"
 
 export function PotRoom({ potId }: { potId: string }) {
+  const usdt = getUsdtConfig()
   const [pot, setPot] = useState<Pot | null>(null)
   const [wallet, setWallet] = useState<LocalWallet | null>(null)
   const [name, setName] = useState("Fan")
@@ -37,6 +40,13 @@ export function PotRoom({ potId }: { potId: string }) {
   const [joinMessage, setJoinMessage] = useState("")
   const [settleSignOpen, setSettleSignOpen] = useState(false)
   const [settleMessage, setSettleMessage] = useState("")
+  const [depositOpen, setDepositOpen] = useState(false)
+  const [payoutOpen, setPayoutOpen] = useState(false)
+  const [payoutTarget, setPayoutTarget] = useState<{
+    address: string
+    amount: number
+    name: string
+  } | null>(null)
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -67,39 +77,72 @@ export function PotRoom({ potId }: { potId: string }) {
       pickLabel: sideLabel(pick, pot),
       stake: pot.stake,
       address: wallet.address,
+      onChain: pot.onChain,
+      tokenAddress: pot.tokenAddress || usdt?.address,
     })
     setJoinMessage(msg)
     setJoinSignOpen(true)
   }
 
-  async function onJoinSigned(result: SignResult) {
+  async function onJoinSigned(sig: SignResult) {
     if (!pot || !wallet) return
+    const participant = {
+      address: wallet.address,
+      name: name.trim() || "Fan",
+      pick,
+      stake: pot.stake,
+      joinedAt: new Date().toISOString(),
+      signature: sig.signature,
+      verified: sig.verified,
+      signedMessage: sig.message,
+    }
     const next: Pot = {
       ...pot,
-      participants: [
-        ...pot.participants,
-        {
-          address: wallet.address,
-          name: name.trim() || "Fan",
-          pick,
-          stake: pot.stake,
-          joinedAt: new Date().toISOString(),
-          signature: result.signature,
-          verified: result.verified,
-          signedMessage: result.message,
-        },
-      ],
+      participants: [...pot.participants, participant],
     }
     savePot(next)
     setPot(next)
     setJoinSignOpen(false)
+
+    if (next.onChain) {
+      setDepositOpen(true)
+    }
+  }
+
+  async function onDepositTransferred(tx: TransferResult) {
+    if (!pot || !wallet) return
+    const next: Pot = {
+      ...pot,
+      participants: pot.participants.map((p) =>
+        p.address.toLowerCase() === wallet.address.toLowerCase()
+          ? {
+              ...p,
+              depositTxHash: tx.hash,
+              depositConfirmed: true,
+            }
+          : p
+      ),
+    }
+    savePot(next)
+    setPot(next)
+    setDepositOpen(false)
   }
 
   function lockPot() {
     if (!pot) return
+    if (pot.onChain) {
+      const unpaid = pot.participants.filter(
+        (p) => p.address.toLowerCase() !== pot.hostAddress.toLowerCase() && !p.depositConfirmed
+      )
+      if (unpaid.length > 0) {
+        setError("All non-host players must deposit USDt before lock")
+        return
+      }
+    }
     const next: Pot = { ...pot, status: "locked" }
     savePot(next)
     setPot(next)
+    setError(null)
   }
 
   function openSettleSign() {
@@ -143,6 +186,31 @@ export function PotRoom({ potId }: { potId: string }) {
     setPot(next)
   }
 
+  function openPayout(address: string, amount: number, name: string) {
+    setPayoutTarget({ address, amount, name })
+    setPayoutOpen(true)
+  }
+
+  async function onPayoutTransferred(tx: TransferResult) {
+    if (!pot || !payoutTarget) return
+    const next: Pot = {
+      ...pot,
+      participants: pot.participants.map((p) =>
+        p.address.toLowerCase() === payoutTarget.address.toLowerCase()
+          ? {
+              ...p,
+              paidOut: true,
+              payoutTxHash: tx.hash,
+            }
+          : p
+      ),
+    }
+    savePot(next)
+    setPot(next)
+    setPayoutOpen(false)
+    setPayoutTarget(null)
+  }
+
   async function copyShare() {
     if (!pot) return
     const encoded = encodePotShare(pot)
@@ -152,9 +220,12 @@ export function PotRoom({ potId }: { potId: string }) {
     setTimeout(() => setShareCopied(false), 2000)
   }
 
-  /** Second WDK wallet for local multiplayer smoke; real sign + verify, then restore host. */
   async function simulateFriend() {
     if (!pot || !wallet) return
+    if (pot.onChain) {
+      setError("Guest player skip is off-chain only. Share the pot link for real deposits.")
+      return
+    }
     setSimBusy(true)
     setError(null)
     try {
@@ -177,7 +248,7 @@ export function PotRoom({ potId }: { potId: string }) {
       })
       const signature = await signMessageWithWdk(friendSeed, msg)
       const verified = await verifySignature(friendAddress, msg, signature)
-      if (!verified) throw new Error("Friend signature failed verification")
+      if (!verified) throw new Error("Guest signature failed verification")
       const next: Pot = {
         ...pot,
         participants: [
@@ -205,7 +276,7 @@ export function PotRoom({ potId }: { potId: string }) {
       })
       setWallet(loadWallet())
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Simulate failed")
+      setError(e instanceof Error ? e.message : "Guest add failed")
     } finally {
       setSimBusy(false)
     }
@@ -231,12 +302,27 @@ export function PotRoom({ potId }: { potId: string }) {
       (p) => p.address.toLowerCase() === wallet.address.toLowerCase()
     )
 
+  const me = wallet
+    ? pot.participants.find(
+        (p) => p.address.toLowerCase() === wallet.address.toLowerCase()
+      )
+    : null
+
+  const explorer = usdt?.explorerTx || "https://etherscan.io/tx/"
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-wide text-emerald-500">{pot.status}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs uppercase tracking-wide text-emerald-500">{pot.status}</p>
+              {pot.onChain && (
+                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] uppercase tracking-wide text-emerald-300">
+                  on-chain USDt
+                </span>
+              )}
+            </div>
             <h1 className="text-2xl font-bold text-white">{pot.title}</h1>
             <p className="mt-1 text-lg text-gray-200">
               {pot.homeTeam} <span className="text-gray-500">vs</span> {pot.awayTeam}
@@ -249,7 +335,13 @@ export function PotRoom({ potId }: { potId: string }) {
             </p>
             <p className="text-xs text-gray-500 mt-1">
               Host {shortAddr(pot.hostAddress)} · id {pot.id}
+              {pot.chainName ? ` · ${pot.chainName}` : ""}
             </p>
+            {pot.onChain && pot.tokenAddress && (
+              <p className="text-xs text-gray-500 mt-0.5 font-mono">
+                token {shortAddr(pot.tokenAddress)}
+              </p>
+            )}
           </div>
           <Button variant="outline" size="sm" onClick={copyShare} className="rounded-full">
             {shareCopied ? "Copied" : "Copy share link"}
@@ -264,7 +356,7 @@ export function PotRoom({ potId }: { potId: string }) {
               <th className="px-4 py-3 font-medium">Player</th>
               <th className="px-4 py-3 font-medium">Pick</th>
               <th className="px-4 py-3 font-medium">Stake</th>
-              <th className="px-4 py-3 font-medium">Signature</th>
+              <th className="px-4 py-3 font-medium">Sig / chain</th>
             </tr>
           </thead>
           <tbody>
@@ -285,6 +377,28 @@ export function PotRoom({ potId }: { potId: string }) {
                   ) : (
                     <span className="text-[11px] text-gray-500">signed</span>
                   )}
+                  {pot.onChain && (
+                    <div className="mt-0.5 text-[11px]">
+                      {p.depositConfirmed ? (
+                        p.depositTxHash === "host-escrow" ? (
+                          <span className="text-emerald-400">host escrow</span>
+                        ) : p.depositTxHash ? (
+                          <a
+                            href={txUrl(p.depositTxHash, explorer)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-emerald-400 underline"
+                          >
+                            deposit tx
+                          </a>
+                        ) : (
+                          <span className="text-emerald-400">deposited</span>
+                        )
+                      ) : (
+                        <span className="text-amber-400">awaiting deposit</span>
+                      )}
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -292,11 +406,23 @@ export function PotRoom({ potId }: { potId: string }) {
         </table>
       </div>
 
+      {wallet && pot.onChain && me && !me.depositConfirmed && me.depositTxHash !== "host-escrow" && (
+        <div className="rounded-2xl border border-amber-900/40 bg-amber-950/20 p-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-amber-100">
+            You signed your pick. Send {pot.stake} USDt to the host to complete entry.
+          </p>
+          <Button size="sm" className="rounded-full" onClick={() => setDepositOpen(true)}>
+            Deposit USDt
+          </Button>
+        </div>
+      )}
+
       {wallet && pot.status === "open" && !alreadyIn && (
         <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5 space-y-3">
           <h2 className="font-semibold text-white">Join this pot</h2>
           <p className="text-sm text-gray-400">
-            You will review a message and sign with your WDK wallet. No silent signing.
+            Sign your pick with WDK
+            {pot.onChain ? ", then send the stake on-chain to the host." : "."}
           </p>
           <label className="block text-sm">
             <span className="text-gray-400">Display name</span>
@@ -336,14 +462,16 @@ export function PotRoom({ potId }: { potId: string }) {
 
       {wallet && pot.status === "open" && alreadyIn && isHost && (
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="secondary"
-            onClick={simulateFriend}
-            disabled={simBusy}
-            className="rounded-full"
-          >
-            {simBusy ? "Signing guest…" : "Add guest player (WDK sign + verify)"}
-          </Button>
+          {!pot.onChain && (
+            <Button
+              variant="secondary"
+              onClick={simulateFriend}
+              disabled={simBusy}
+              className="rounded-full"
+            >
+              {simBusy ? "Signing guest…" : "Add guest player (WDK sign + verify)"}
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={lockPot}
@@ -408,7 +536,7 @@ export function PotRoom({ potId }: { potId: string }) {
           </div>
           {plan.length === 0 ? (
             <p className="text-sm text-amber-300">
-              No correct picks. Return stakes peer-to-peer.
+              No correct picks. Return stakes to depositors peer-to-peer.
             </p>
           ) : (
             <ul className="space-y-2">
@@ -426,12 +554,31 @@ export function PotRoom({ potId }: { potId: string }) {
                       <div className="font-mono text-xs text-gray-500">
                         {shortAddr(row.address)}
                       </div>
+                      {p?.payoutTxHash && (
+                        <a
+                          href={txUrl(p.payoutTxHash, explorer)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] text-emerald-400 underline"
+                        >
+                          payout tx
+                        </a>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-emerald-300">
                         {row.amount} {pot.currency}
                       </span>
-                      {isHost && (
+                      {isHost && pot.onChain && !p?.paidOut && (
+                        <Button
+                          size="sm"
+                          className="rounded-full"
+                          onClick={() => openPayout(row.address, row.amount, row.name)}
+                        >
+                          Pay USDt
+                        </Button>
+                      )}
+                      {isHost && !pot.onChain && (
                         <Button
                           size="sm"
                           variant={p?.paidOut ? "ghost" : "outline"}
@@ -442,6 +589,9 @@ export function PotRoom({ potId }: { potId: string }) {
                           {p?.paidOut ? "Paid" : "Mark paid"}
                         </Button>
                       )}
+                      {p?.paidOut && pot.onChain && (
+                        <span className="text-xs text-emerald-400">paid</span>
+                      )}
                     </div>
                   </li>
                 )
@@ -449,8 +599,9 @@ export function PotRoom({ potId }: { potId: string }) {
             </ul>
           )}
           <p className="text-xs text-gray-500">
-            Payouts are peer-to-peer USDt to winner addresses. Each player keeps their own WDK
-            keys.
+            {pot.onChain
+              ? "Payouts use WDK ERC-20 transfer of USDt from the host escrow wallet."
+              : "Off-chain mode: mark paid after you settle peer-to-peer."}
           </p>
         </div>
       )}
@@ -472,7 +623,7 @@ export function PotRoom({ potId }: { potId: string }) {
           onClose={() => setJoinSignOpen(false)}
           wallet={wallet}
           title="Sign to join pot"
-          subtitle="Review the pick and stake, then sign with WDK. Signature is verified before you are added."
+          subtitle="Review the pick and stake, then sign with WDK."
           message={joinMessage}
           confirmLabel="Sign & join"
           onSigned={onJoinSigned}
@@ -489,6 +640,35 @@ export function PotRoom({ potId }: { potId: string }) {
           message={settleMessage}
           confirmLabel="Sign & settle"
           onSigned={onSettleSigned}
+        />
+      )}
+
+      {wallet && pot.onChain && (
+        <TransferRequest
+          open={depositOpen}
+          onClose={() => setDepositOpen(false)}
+          wallet={wallet}
+          kind="deposit"
+          amountHuman={pot.stake}
+          to={pot.hostAddress}
+          potId={pot.id}
+          onTransferred={onDepositTransferred}
+        />
+      )}
+
+      {wallet && pot.onChain && payoutTarget && (
+        <TransferRequest
+          open={payoutOpen}
+          onClose={() => {
+            setPayoutOpen(false)
+            setPayoutTarget(null)
+          }}
+          wallet={wallet}
+          kind="payout"
+          amountHuman={payoutTarget.amount}
+          to={payoutTarget.address}
+          potId={pot.id}
+          onTransferred={onPayoutTransferred}
         />
       )}
     </div>

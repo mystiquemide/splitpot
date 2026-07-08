@@ -105,6 +105,17 @@ See [`.env.example`](./.env.example) and [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.
 | Wallet | `WalletManagerEvm` + `SeedSignerEvm` |
 | Sign | `account.sign(message)` after user confirms |
 | Verify | `WalletAccountReadOnlyEvm.verify(message, signature)` |
+| USDt balance | `account.getTokenBalance(token)` |
+| USDt transfer | `account.transfer({ token, recipient, amount })` after user confirms |
+
+### On-chain USDt path
+
+1. Set `NEXT_PUBLIC_USDT_ADDRESS` (+ matching RPC) in `.env.local`
+2. Create a pot with **On-chain USDt stakes** enabled
+3. Joiners **sign** their pick, then **send stake** to the host via WDK ERC-20 transfer
+4. Host settles the match, then **Pay USDt** to each winner (on-chain transfer)
+
+Host acts as temporary escrow with their own self-custodial key. Explorer links are recorded on the pot.
 
 ## Try the product
 
