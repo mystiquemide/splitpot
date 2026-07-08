@@ -12,6 +12,24 @@ Self-custodial matchday prediction pots. Equal stakes, signed picks, fair splits
 
 Watch parties already run informal pots on Venmo, cash, or a trusted friend. Splitpot makes that flow honest: every player holds their own keys with **Tether WDK**, locks a pick with a real signature, and settles when the whistle goes. No custodian. No cloud AI.
 
+## Documentation
+
+Full product docs ship with the app:
+
+**https://github.com/mystiquemide/splitpot** → open the deployed site at `/docs` (or local `http://localhost:3000/docs`).
+
+| Page | Path |
+|------|------|
+| Introduction | `/docs` |
+| Getting started | `/docs/getting-started` |
+| How it works | `/docs/how-it-works` |
+| Wallets & signing | `/docs/wallets` |
+| On-chain USDt | `/docs/on-chain` |
+| Security | `/docs/security` |
+| Architecture | `/docs/architecture` |
+| Deployment | `/docs/deployment` |
+| FAQ | `/docs/faq` |
+
 ## Product
 
 | Surface | Route |
@@ -20,6 +38,7 @@ Watch parties already run informal pots on Venmo, cash, or a trusted friend. Spl
 | App (wallet + pots) | `/app` |
 | Pot room | `/pot/[id]` |
 | Import share link | `/import?d=…` |
+| Documentation | `/docs` |
 
 <p align="center">
   <img src="docs/assets/landing.png" alt="Splitpot landing page" width="800" />

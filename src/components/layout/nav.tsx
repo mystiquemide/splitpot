@@ -15,8 +15,8 @@ export function Nav() {
           <Link href="/#how" className="hidden sm:inline text-neutral-600 hover:text-black">
             How it works
           </Link>
-          <Link href="/#why" className="hidden sm:inline text-neutral-600 hover:text-black">
-            Why
+          <Link href="/docs" className="hidden sm:inline text-neutral-600 hover:text-black">
+            Docs
           </Link>
           <Link href="/app">
             <Button size="sm">Start a pot</Button>
