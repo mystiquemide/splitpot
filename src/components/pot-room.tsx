@@ -38,13 +38,12 @@ export function PotRoom({ potId }: { potId: string }) {
   const [settleSignOpen, setSettleSignOpen] = useState(false)
   const [settleMessage, setSettleMessage] = useState("")
 
-  function refresh() {
-    setPot(getPot(potId))
-    setWallet(loadWallet())
-  }
-
   useEffect(() => {
-    refresh()
+    const t = window.setTimeout(() => {
+      setPot(getPot(potId))
+      setWallet(loadWallet())
+    }, 0)
+    return () => window.clearTimeout(t)
   }, [potId])
 
   const plan = useMemo(() => (pot ? payoutPlan(pot) : []), [pot])
@@ -153,7 +152,7 @@ export function PotRoom({ potId }: { potId: string }) {
     setTimeout(() => setShareCopied(false), 2000)
   }
 
-  /** Demo: second WDK wallet, real sign + verify, restore host session. */
+  /** Second WDK wallet for local multiplayer smoke; real sign + verify, then restore host. */
   async function simulateFriend() {
     if (!pot || !wallet) return
     setSimBusy(true)
@@ -185,7 +184,7 @@ export function PotRoom({ potId }: { potId: string }) {
           ...pot.participants,
           {
             address: friendAddress,
-            name: "Friend (demo)",
+            name: "Guest player",
             pick: friendPick,
             stake: pot.stake,
             joinedAt: new Date().toISOString(),
@@ -343,7 +342,7 @@ export function PotRoom({ potId }: { potId: string }) {
             disabled={simBusy}
             className="rounded-full"
           >
-            {simBusy ? "Signing friend…" : "Add demo friend (WDK sign + verify)"}
+            {simBusy ? "Signing guest…" : "Add guest player (WDK sign + verify)"}
           </Button>
           <Button
             variant="outline"

@@ -26,7 +26,8 @@ export function WalletBar() {
   const [pendingAddress, setPendingAddress] = useState<string | null>(null)
 
   useEffect(() => {
-    setWallet(loadWallet())
+    const t = window.setTimeout(() => setWallet(loadWallet()), 0)
+    return () => window.clearTimeout(t)
   }, [])
 
   async function prepareCreate() {
@@ -195,9 +196,13 @@ export function WalletBar() {
 export function useWallet(): LocalWallet | null {
   const [wallet, setWallet] = useState<LocalWallet | null>(null)
   useEffect(() => {
-    setWallet(loadWallet())
-    const id = setInterval(() => setWallet(loadWallet()), 1000)
-    return () => clearInterval(id)
+    const tick = () => setWallet(loadWallet())
+    const t = window.setTimeout(tick, 0)
+    const id = window.setInterval(tick, 1000)
+    return () => {
+      window.clearTimeout(t)
+      window.clearInterval(id)
+    }
   }, [])
   return wallet
 }

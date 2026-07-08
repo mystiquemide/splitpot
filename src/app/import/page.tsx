@@ -13,22 +13,25 @@ function ImportInner() {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    const d = params.get("d")
-    if (!d) {
-      setStatus("err")
-      setMessage("Missing share payload")
-      return
-    }
-    const pot = decodePotShare(d)
-    if (!pot || !pot.id) {
-      setStatus("err")
-      setMessage("Invalid share link")
-      return
-    }
-    savePot(pot)
-    setStatus("ok")
-    setMessage(`Imported ${pot.title}`)
-    router.replace(`/pot/${pot.id}`)
+    const t = window.setTimeout(() => {
+      const d = params.get("d")
+      if (!d) {
+        setStatus("err")
+        setMessage("Missing share payload")
+        return
+      }
+      const pot = decodePotShare(d)
+      if (!pot || !pot.id) {
+        setStatus("err")
+        setMessage("Invalid share link")
+        return
+      }
+      savePot(pot)
+      setStatus("ok")
+      setMessage(`Imported ${pot.title}`)
+      router.replace(`/pot/${pot.id}`)
+    }, 0)
+    return () => window.clearTimeout(t)
   }, [params, router])
 
   return (

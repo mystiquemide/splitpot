@@ -180,7 +180,7 @@ export function LandingPage() {
         <div className="mb-10">
           <p className="text-sm font-medium text-emerald-400 mb-2">Why Splitpot</p>
           <h2 className="text-3xl font-bold text-white tracking-tight">
-            Built for real groups, not demo theater.
+            Built for real groups, not theater.
           </h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

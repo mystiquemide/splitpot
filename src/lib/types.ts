@@ -6,7 +6,7 @@ export interface Participant {
   address: string
   name: string
   pick: MatchSide
-  /** Stake amount in whole USDt units (display). Commitment is local for demo. */
+  /** Stake amount in whole USDt units (display). Commitment recorded in the pot. */
   stake: number
   joinedAt: string
   /** WDK personal_sign hex. Proves self-custodial control. */
@@ -42,7 +42,7 @@ export interface Pot {
 
 export interface LocalWallet {
   address: string
-  /** Demo only: seed kept in sessionStorage. Never send to a server. */
+  /** Seed kept in sessionStorage only. Never send to a server. */
   seedPhrase: string
   createdAt: string
   /** Optional unlock proof from first sign */

@@ -13,9 +13,13 @@ export default function AppPage() {
   const [pots, setPots] = useState<Pot[]>([])
 
   useEffect(() => {
-    setPots(loadPots())
-    const id = setInterval(() => setPots(loadPots()), 1500)
-    return () => clearInterval(id)
+    const tick = () => setPots(loadPots())
+    const t = window.setTimeout(tick, 0)
+    const id = window.setInterval(tick, 1500)
+    return () => {
+      window.clearTimeout(t)
+      window.clearInterval(id)
+    }
   }, [])
 
   return (

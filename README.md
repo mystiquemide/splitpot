@@ -1,104 +1,159 @@
 # Splitpot
 
-Matchday prediction pots for friends. Equal stake, lock picks, settle full time, split the pool.  
-Self-custodial wallets via **Tether WDK**. No custodian. No cloud AI.
+Self-custodial matchday prediction pots. Equal stakes, signed picks, fair splits after full time.
 
-**Track:** WDK  
-**Theme:** football / global tournament (watch parties, predictions, tipping-style stakes)  
-**License:** Apache 2.0  
-**Hackathon:** [Tether Developers Cup](https://dorahacks.io/hackathon/tether-developers-cup/detail)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![WDK](https://img.shields.io/badge/Tether-WDK-10b981)](https://wdk.tether.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)](https://www.typescriptlang.org/)
+[![CI](https://github.com/mystiquemide/splitpot/actions/workflows/ci.yml/badge.svg)](https://github.com/mystiquemide/splitpot/actions/workflows/ci.yml)
 
-## Why it exists
+## Positioning
 
-Watch parties already run informal pots on Venmo, cash, or “trust me bro.” Splitpot makes that flow honest:
+Watch parties already run informal pots on Venmo, cash, or a trusted friend. Splitpot makes that flow honest: every player holds their own keys with **Tether WDK**, locks a pick with a real signature, and settles when the whistle goes. No custodian. No cloud AI.
 
-1. Each player creates a **self-custodial WDK wallet**
-2. Everyone stakes the same amount and locks a pick
-3. Host settles the official result
-4. Winners split the pool; pay peer-to-peer USDt to winner addresses
+## Product
 
-## How we use WDK (meaningful, not a logo)
+| Surface | Route |
+|---------|--------|
+| Landing | `/` |
+| App (wallet + pots) | `/app` |
+| Pot room | `/pot/[id]` |
+| Import share link | `/import?d=…` |
 
-| Action | WDK API |
-|--------|---------|
-| Create wallet | `WDK.getRandomSeedPhrase()` + `registerWallet('ethereum', WalletManagerEvm)` |
-| Derive address | `wdk.getAccount('ethereum', 0)` → `getAddress()` |
-| Join pot | `account.sign(message)` attestation of pot id + pick + stake |
-| Optional chain | Sepolia RPC for balance / native send when funded |
+<p align="center">
+  <img src="docs/assets/landing.png" alt="Splitpot landing page" width="800" />
+</p>
 
-Keys never leave the browser session (`sessionStorage`). No server custody.
+<p align="center">
+  <img src="docs/assets/app.png" alt="Splitpot app with wallet and pot create" width="800" />
+</p>
 
-## Run locally
+> Screenshots: see `docs/assets/`. If images are missing in a shallow clone, run the app locally and capture `/` and `/app`.
+
+## Features
+
+- **Self-custodial wallets** — create or import a seed with Tether WDK; keys stay in the browser session
+- **Explicit signing** — unlock, create, join, and settle open a sign modal; no silent signatures
+- **Verified attestations** — every join is checked with WDK read-only `verify`
+- **Equal-stake pots** — same stake for every player, simple winner split
+- **Share links** — export pot state so friends can import on another device
+- **Consumer landing** — clear product story before the app
+
+## Tech stack
+
+| Layer | Choice |
+|-------|--------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| UI | React 19, Tailwind CSS 4 |
+| Wallets | `@tetherto/wdk`, `@tetherto/wdk-wallet-evm` |
+| Storage | `sessionStorage` (wallet), `localStorage` (pots) |
+| Hosting | Vercel-ready |
+
+## Architecture
+
+Wallet keys and signing run on the user device. Pot records live in browser storage and can be shared via encoded links. Optional EVM RPC is used for wallet module provider config.
+
+```mermaid
+flowchart LR
+  User[Browser] --> Landing[Landing]
+  User --> App[App]
+  App --> WDK[Tether WDK]
+  App --> Store[Local pot store]
+  WDK --> RPC[EVM RPC]
+```
+
+See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for trust boundaries and the full signing sequence.
+
+## Quick start
 
 ```bash
+git clone https://github.com/mystiquemide/splitpot.git
+cd splitpot
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Optional env:
+## Environment variables
 
-```bash
-# .env.local
-NEXT_PUBLIC_EVM_RPC_URL=https://sepolia.drpc.org
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_EVM_RPC_URL` | No | EVM JSON-RPC for WDK. Defaults to a public Sepolia endpoint. |
+| `NEXT_PUBLIC_APP_URL` | No | Canonical URL for production share links. |
 
-## Product surfaces
+See [`.env.example`](./.env.example) and [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 
-| URL | What |
-|-----|------|
-| `/` | Consumer landing page |
-| `/app` | Create wallet, open pots |
-| `/pot/[id]` | Join, lock, settle |
-| `/import?d=…` | Import shared pot |
+## Scripts
 
-## Real wallet signing
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Local development |
+| `npm run build` | Production build |
+| `npm start` | Serve production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript `--noEmit` |
 
-Every sensitive action opens a **SignRequest** modal:
+## How WDK is used
 
-1. User reads the full message (pot, pick, stake, address)
-2. User clicks **Sign with WDK** (no silent signing)
-3. `account.sign(message)` runs via `@tetherto/wdk-wallet-evm`
-4. Signature is **verified** with `WalletAccountReadOnlyEvm.verify()`
-5. Only then is the action saved
+| Action | API |
+|--------|-----|
+| Seed | `WDK.getRandomSeedPhrase()` |
+| Wallet | `WalletManagerEvm` + `SeedSignerEvm` |
+| Sign | `account.sign(message)` after user confirms |
+| Verify | `WalletAccountReadOnlyEvm.verify(message, signature)` |
 
-Actions gated: unlock wallet · create pot · join pot · settle pot.
-
-## Demo path (judges, under 3 minutes)
+## Try the product
 
 1. Open `/` → **Open app**
-2. **Create WDK wallet** → sign unlock challenge
-3. **Create pot** → review message → sign
-4. **Add demo friend** (second wallet, sign + verify)
-5. **Lock picks** → **Review & sign to settle**
-6. See **payout plan** and mark paid
+2. Create a WDK wallet and sign the unlock challenge
+3. Create a pot and sign your pick
+4. Add a second player (new wallet, signed join) or share the pot link
+5. Lock picks, sign to settle, review the payout plan
 
-Share link copies pot state so another browser can import it.
+## Verification status
 
-## Stack
+| Check | Status |
+|-------|--------|
+| `npm run lint` | Run in CI and before release |
+| `npm run typecheck` | Run in CI and before release |
+| `npm run build` | Required green |
+| Product paths `/`, `/app`, pot room | Manual smoke on each release |
 
-- Next.js (App Router) + TypeScript + Tailwind  
-- `@tetherto/wdk` + `@tetherto/wdk-wallet-evm`  
-- Client-side pot store (`localStorage`) + share import  
+## Deployment
 
-## Third-party services
+See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 
-| Service | Use | Required? |
-|---------|-----|-----------|
-| Public Sepolia RPC (`sepolia.drpc.org` or your URL) | Address derivation network config / optional balance | For WDK EVM provider |
-| None for pot coordination | Pots live in browser / share links | — |
+```bash
+npx vercel link
+npx vercel --prod
+```
 
-No cloud AI. No custodial backend.
+## Repository layout
 
-## Prior work
+```
+src/
+  app/                 # routes: landing, app, pot, import
+  components/          # landing, wallet, sign modal, pot room
+  lib/                 # WDK client, pot logic, storage
+docs/
+  ARCHITECTURE.md
+  DEPLOYMENT.md
+  assets/              # product screens
+.github/               # CI, CodeQL, Dependabot, templates
+```
 
-Boilerplate skeleton from `MystiqueMide/boilerplate-web3` (stripped). All Splitpot product logic and WDK integration written during the hackathon period.
+## Contributing
 
-## Nation
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Pull requests are welcome.
 
-Configure on DoraHacks submission (team represents a nation of choice).
+## Security
+
+See [SECURITY.md](./SECURITY.md). Report vulnerabilities privately to splashmediahub@gmail.com.
 
 ## License
 
-Apache License 2.0 — see [LICENSE](./LICENSE).
+[Apache License 2.0](./LICENSE)
